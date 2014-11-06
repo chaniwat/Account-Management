@@ -1,5 +1,4 @@
-Account Management Application
-Final-Term Python Project
-
-Develop by Chaniwat Seangchai and Jirat Akarasuwannachai
-ITKMITL#12
+<h1>Account Management Application<br>
+<sub>Python Project<sup></h1>
+Develop by Chaniwat Seangchai and Jirat Akarasuwannachai<br>
+Faculty of Information Technology, king mongkut’s institute of technology ladkrabang
