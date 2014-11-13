@@ -56,47 +56,5 @@ def db_delete(filename):
     #return true and success discription
     return True, "delete database successfully"
 
-def db_excecute(filename, sqlscript):
-    """____"""
-    #Convert filename to string and insert file extension for filename
-    filename = str(filename)+FILE_EXTENSION_DATABASE
-
-    #Check directory to store the database file. if not exist, return false and error message
-    if not os.path.exists(DATABASE_DIRECTORY_PATH):
-        return False, "no database directory found"
-
-    #Check if file not exist will return False and error message
-    if not os.path.exists(DATABASE_DIRECTORY_PATH+filename):
-        return False, "database file not found"
-
-    #Change working directory
-    os.chdir(DATABASE_DIRECTORY_PATH)
-
-    #Try to execute sql script into database, if any error happen rollback the operation
-    try:
-        #Connect to database
-        db_connect = sql.connect(filename)
-        db_cursor = db_connect.cursor()
-
-        #Execute the sql script
-        db_cursor.executescript(sqlscript)
-
-        #Commit the sql script
-        db_connect.commit()
-
-        #return True and success message
-        return True, "sql summit complete"
-    #Error handling if any error happen
-    except sql.Error, e:
-        #If connecting the database, Rollback commit script
-        if db_connect:
-            db_connect.rollback()
-
-        #return False and error message
-        return False, "error: %s" % e.args[0]
-    #Close connection if program connected to database
-    finally:
-        if db_connect:
-            db_connect.close()
-
-print db_excecute(raw_input(), raw_input())
+if __name__ == "__main__":
+    print db_delete(raw_input())
