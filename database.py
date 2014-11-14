@@ -13,10 +13,10 @@ DATABASE_DIRECTORY_NAME = "accountdata"
 #Full directory path that keep the database file
 DATABASE_DIRECTORY_PATH = THIS_FILE_DIRECTORY_PATH+"\\"+DATABASE_DIRECTORY_NAME+"\\"
 
-def db_create(filename):
+def createdatabase(filename):
     """Create new database file. If already exist database file will return an error."""
     #Convert filename to string and insert file extension for filename
-    filename = str(filename)+FILE_EXTENSION_DATABASE
+    filename = filename+FILE_EXTENSION_DATABASE
 
     #Check directory to store the database file. if not exist create new one
     if not os.path.exists(DATABASE_DIRECTORY_PATH):
@@ -38,10 +38,10 @@ def db_create(filename):
         #return true and success discription
         return True, "create new database success"
 
-def db_delete(filename):
+def deletedatabase(filename):
     """Delete the database file. If directory or database file not exist will return an error."""
     #Convert filename to string and insert file extension for filename
-    filename = str(filename)+FILE_EXTENSION_DATABASE
+    filename = filename+FILE_EXTENSION_DATABASE
 
     #Check directory to store the database file. if not exist, return false and error message
     if not os.path.exists(DATABASE_DIRECTORY_PATH):
@@ -57,4 +57,4 @@ def db_delete(filename):
     return True, "delete database successfully"
 
 if __name__ == "__main__":
-    print db_delete(raw_input())
+    print createdatabase(raw_input())
