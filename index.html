@@ -1,1 +1,84 @@
-Hello World
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Hello, Title!</title>
+	<meta charset="utf-8">
+	<style>
+	body
+	{
+		margin: 0;
+		padding: 0;
+		background-color: rgb(214, 69, 65);
+	}
+
+	#textbox_center_middle
+	{
+		width: 100%;
+		position: absolute;
+		top: 50%;
+		font-size: 90px;
+		text-align: center;
+		color: rgb(236,236,236);
+	}
+	</style>
+</head>
+
+<body>
+	<div id="textbox_center_middle" style="">Account-Management</div>
+	<!-- script load -->
+	<script src="js/jquery.min.js"></script>
+	<script>
+	function settextbox(){
+		var textbox_width = $("#textbox_center_middle").width();
+		var textbox_height = $("#textbox_center_middle").height();
+		$("#textbox_center_middle").css("margin-top", "-"+(textbox_height/2)+"px");
+	}
+
+	function transitionbodycolor(transfer_time)
+	{
+		//Settings Color Patterns, Changing color from top -> bottom as order below
+		var colorset = [
+			"rgb(214, 69, 65)",
+			"rgb(248, 148, 6)",
+			"rgb(244, 179, 80)",
+			"rgb(38, 166, 91)",
+			"rgb(54, 215, 183)",
+			"rgb(34, 167, 240)",
+			"rgb(65, 131, 215)",
+			"rgb(191, 85, 236)",
+			"rgb(210, 82, 127)",
+			"rgb(226, 106, 106)"
+		];
+
+		var currentbodycolor = $("body").css("background-color");
+		var currentbodycolor_index = colorset.indexOf(currentbodycolor);
+		
+		if(currentbodycolor_index+1 < colorset.length-1)
+		{
+			$("body").css("background-color", colorset[currentbodycolor_index+1]);
+		}
+		else
+		{
+			$("body").css("background-color", colorset[0]);
+		}
+
+		$("body").css("transition", "background-color "+transfer_time+"s");
+	}
+
+	function initiate_transitionbodycolor(transfer_time) //Initiate the color transition
+	{
+		transitionbodycolor(transfer_time);
+		setInterval(function(){ transitionbodycolor(transfer_time); }, (transfer_time*1000)+1);
+	}
+	
+	$(document).ready(function(){
+		settextbox();
+		initiate_transitionbodycolor(2.2);
+	});
+
+	$(window).resize(function(){
+		settextbox();
+	});
+	</script>
+</body>
+</html>
