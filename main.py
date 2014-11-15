@@ -11,8 +11,7 @@ class RootApp:
         self.button = Tk.Button(self.root)
         self.button.config(
             text = "สร้างผู้ใช้ใหม่",
-            command = self.show_newdatabasedialog,
-            font = ("Waffle Regular Regular", "12")
+            command = self.show_newdatabasedialog
         )
         self.button.pack()
 
@@ -42,7 +41,6 @@ class AlertDialog(Tk.Toplevel):
         self.label_alert = Tk.Label(self)
         self.label_alert.config(
             text = alert_discription,
-            font = ("Waffle Regular Regular", "14")
         )
         self.label_alert.pack()
 
@@ -50,9 +48,9 @@ class AlertDialog(Tk.Toplevel):
         self.btn_accept = Tk.Button(self)
         self.btn_accept.config(
             command = self.acceptdialog,
-            text = "OK",
-            font = ("Waffle Regular Regular", "12")
+            text = "OK"
         )
+        
         self.btn_accept.pack()
 
         #Bind protocol for accept this dialog
@@ -84,8 +82,7 @@ class NewDatabaseDialog(Tk.Toplevel):
         #Create textbox for new user : database name
         self.textbox_databasename = Tk.Entry(self)
         self.textbox_databasename.config(
-            width = 30,
-            font = ("Waffle Regular Regular", "16")
+            width = 30
         )
         self.textbox_databasename.pack()
 
@@ -93,8 +90,7 @@ class NewDatabaseDialog(Tk.Toplevel):
         self.btn_submitcreate = Tk.Button(self)
         self.btn_submitcreate.config(
             command = self.submitcreate,
-            text = "สร้าง",
-            font = ("Waffle Regular Regular", "12")
+            text = "สร้าง"
         )
         self.btn_submitcreate.pack()
 
