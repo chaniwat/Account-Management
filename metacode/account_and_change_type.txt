@@ -1,0 +1,24 @@
+ACCOUNT_TYPE
+----------------------------------
+ACC_WALLET - wallet
+    CHANGE_WALLET_INCOME - income
+    CHANGE_WALLET_EAT - eat and drink
+    CHANGE_WALLET_BUY - buy anything
+    CHANGE_WALLET_ENTERTAINMENT - watch movie, etc
+    CHANGE_WALLET_TRAVEL - money that use to go to somewhere
+    CHANGE_WALLET_BILL - water, electric, etc
+ACC_BANK - bank
+    CHANGE_BANK_DEPOSIT - deposit money
+    CHANGE_BANK_WITHDRAW - withdraw money
+    CHANGE_BANK_TRANSFER - transfer money
+    CHANGE_BANK_PAY - pay money
+ACC_POT - pot
+    CHANGE_POT_DEPOSIT - deposit money
+    CHANGE_POT_WITHDRAW - withdraw money
+EXTRA
+    CHANGE_INITIATE - initiate money of that account
+----------------------------------
+ACCOUNT_STATUS
+----------------------------------
+CON - using
+DIS - not use
