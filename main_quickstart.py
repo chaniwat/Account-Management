@@ -7,7 +7,7 @@ import database as db
 #Quick start window
 class QuickStartWindow(Tk.Toplevel):
     def __init__(self, root):
-        #Keep variable target to root
+        #Keep variable reference to root
         self.root = root
 
         #Create new window (Toplevel)
@@ -37,12 +37,17 @@ class QuickStartWindow(Tk.Toplevel):
             self.accountcollector[i] = QuickStartAccountWidget(self.accountlistframe, data)
 
         #Create Button for add new account
-        Tk.Button(self, text="Add account", height=4).pack(fill="x")
+        Tk.Button(self, text="Add user", height=4, command=self.summon_adduserwindow).pack(fill="x")
+
+    def summon_adduserwindow(self):
+        adduserwindow = QuickStart_AddUserWindow(self)
+        self.wait_window(adduserwindow)
+        self.focus_set()
 
 #Quick start window : account widget for account collector
 class QuickStartAccountWidget(Tk.Frame):
     def __init__(self, root, data):
-        #Keep variable target to root
+        #Keep variable reference to root
         self.root = root
 
         #Seperate the data
@@ -59,3 +64,34 @@ class QuickStartAccountWidget(Tk.Frame):
         Tk.Label(self, text=self.user_name+" "+self.user_surname, width=50, anchor='w').grid(row=0, column=0)
         Tk.Label(self, text=self.lasteditdate, width=50, anchor='w').grid(row=1, column=0)
         Tk.Button(self, text='Button', bg='#FFFFFF').grid(row=0, column=1, rowspan=2, padx=20, pady=20)
+
+#Add User window : Quick start window : user from window for add new user
+class QuickStart_AddUserWindow(Tk.Toplevel):
+    def __init__(self, root):
+        #Keep variable reference to root
+        self.root = root
+
+        #Create new top level
+        Tk.Toplevel.__init__(self, self.root)
+        #Set title
+        self.title("Add User")
+
+        #Overlay and freeze the quick start window (root window)
+        self.transient(self.root)
+        self.grab_set()
+        #Set main focus to self
+        self.focus_set()
+
+        #Create textbox for new user : name
+        self.textbox_databasename = Tk.Entry(self)
+        self.textbox_databasename.config(
+            width = 30
+        )
+        self.textbox_databasename.pack()
+
+        #Create button for new user : submit add new user
+        self.btn_submitcreate = Tk.Button(self)
+        self.btn_submitcreate.config(
+            text = "Add new user"
+        )
+        self.btn_submitcreate.pack()
