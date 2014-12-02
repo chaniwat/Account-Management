@@ -44,6 +44,12 @@ class QuickStartWindow(Tk.Toplevel):
         self.wait_window(adduserwindow)
         self.focus_set()
 
+    def addcreate_newaccountwidget(self, data):
+        #Get current number of accountcollector by length of dict
+        currentnumber = len(self.accountcollector)
+        #Add account widget unber all widget that already create
+        self.accountcollector[currentnumber] = QuickStartAccountWidget(self.accountlistframe, data)
+
 #Quick start window : account widget for account collector
 class QuickStartAccountWidget(Tk.Frame):
     def __init__(self, root, data):
@@ -120,6 +126,7 @@ class QuickStart_AddUserWindow(Tk.Toplevel):
         sentresult = db.createdatabase(data)
         #Print Result
         print sentresult[1]
-        #If result is success, close window
+        #If result is success, add account widget and close window
         if sentresult[0]:
+            self.root.addcreate_newaccountwidget([sentresult[2], data["name"], data["surname"], data["createdate"], data["createdate"]])
             self.destroy()

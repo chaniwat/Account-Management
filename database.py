@@ -22,10 +22,6 @@ def createdatabase(data):
     data[key] contain:
         key: name, surname, nickname, birthdate, has_pwd, pwd, createdate, money
     """
-    print data
-    for key in data.keys():
-        print key, ":", data[key]
-
     #Encode filename to md5 string and insert file extension for filename
     filename = md5_encode(data["name"].encode("utf-8"))+FILE_EXTENSION_DATABASE
 
@@ -75,7 +71,7 @@ def createdatabase(data):
         db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"].decode(sys.stdin.encoding)+"', 'ACCOUNT_INITIATE_TEXT', "+data["money"]+")")
 
     #return true and success code
-    return True, "DB_SUCCESS_CREATE"
+    return True, "DB_SUCCESS_CREATE", filename
 
 def deletedatabase(filename):
     """Delete the database file. If directory or database file not exist will return an error code."""
