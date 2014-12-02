@@ -50,7 +50,7 @@ class QuickStartAccountWidget(Tk.Frame):
         #Keep variable reference to root
         self.root = root
 
-        #Seperate the data
+        #Seperate the dataคค
         self.filename = data[0]
         self.user_name = data[1]
         self.user_surname = data[2]
@@ -82,16 +82,44 @@ class QuickStart_AddUserWindow(Tk.Toplevel):
         #Set main focus to self
         self.focus_set()
 
-        #Create textbox for new user : name
-        self.textbox_databasename = Tk.Entry(self)
-        self.textbox_databasename.config(
-            width = 30
-        )
-        self.textbox_databasename.pack()
+        #Frame Collector for input textbox frame
+        self.textbox_frame = dict()
+        #Textbox Collector for data
+        self.textbox_collector = dict()
+        #Label Collector for label of textbox
+        self.textbox_label = dict()
+        #Data key for add new user
+        data_key = ["name", "surname", "nickname", "birthday", "has_pwd", "pwd", "createdate", "money"]
+
+        #Create label and textbox to insert data for add new user
+        for key in data_key:
+            self.textbox_frame[key] = Tk.Frame(self)
+            self.textbox_frame[key].pack()
+            self.textbox_label[key] = Tk.Label(self.textbox_frame[key], text=key)
+            self.textbox_label[key].pack(side="left")
+            self.textbox_collector[key] = Tk.Entry(self.textbox_frame[key])
+            self.textbox_collector[key].config(
+                width = 30
+            )
+            self.textbox_collector[key].pack(side="left")
 
         #Create button for new user : submit add new user
         self.btn_submitcreate = Tk.Button(self)
         self.btn_submitcreate.config(
-            text = "Add new user"
+            text = "Add new user",
+            command = lambda: self.submitecreate(self.textbox_collector)
         )
         self.btn_submitcreate.pack()
+
+    def submitecreate(self, userdata):
+        #Fetch all data into dict
+        data = dict()
+        for key in userdata.keys():
+            data[key] = userdata[key].get()
+        #Sent to database modules to create the file and handle the result
+        sentresult = db.createdatabase(data)
+        #Print Result
+        print sentresult[1]
+        #If result is success, close window
+        if sentresult[0]:
+            self.destroy()

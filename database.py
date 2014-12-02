@@ -20,10 +20,14 @@ def md5_encode(string):
 def createdatabase(data):
     """Create new database file and insert info for user database. If already exist database file will return an error code.
     data[key] contain:
-        key: name, string, surname, nickname, birthdate, has_pwd, pwd, createdate, money
+        key: name, surname, nickname, birthdate, has_pwd, pwd, createdate, money
     """
+    print data
+    for key in data.keys():
+        print key, ":", data[key]
+
     #Encode filename to md5 string and insert file extension for filename
-    filename = md5_encode(data["name"])+FILE_EXTENSION_DATABASE
+    filename = md5_encode(data["name"].encode("utf-8"))+FILE_EXTENSION_DATABASE
 
     #Check directory to store the database file. if not exist create new one
     if not os.path.exists(DATABASE_DIRECTORY_PATH):
@@ -41,14 +45,14 @@ def createdatabase(data):
 
     #Create tuple of property data to insert into database user_info table
     user_info_property = (
-        ("USER_NAME", data["name"].decode(sys.stdin.encoding)),
-        ("USER_SURNAME", data["surname"].decode(sys.stdin.encoding)),
-        ("USER_NICKNAME", data["nickname"].decode(sys.stdin.encoding)),
-        ("USER_BIRTHDATE",data["birthday"].decode(sys.stdin.encoding)),
-        ("USER_HAS_PWD", data["has_pwd"].decode(sys.stdin.encoding)),
-        ("USER_PWD", data["pwd"].decode(sys.stdin.encoding)),
-        ("USER_CREATEDATE", data["createdate"].decode(sys.stdin.encoding)),
-        ("USER_LASTEDITDATE", data["createdate"].decode(sys.stdin.encoding))
+        ("USER_NAME", data["name"]),
+        ("USER_SURNAME", data["surname"]),
+        ("USER_NICKNAME", data["nickname"]),
+        ("USER_BIRTHDATE",data["birthday"]),
+        ("USER_HAS_PWD", data["has_pwd"]),
+        ("USER_PWD", data["pwd"]),
+        ("USER_CREATEDATE", data["createdate"]),
+        ("USER_LASTEDITDATE", data["createdate"])
     )
 
     #Create by connect the database, if not exist it will create the new one
@@ -65,10 +69,10 @@ def createdatabase(data):
         db_cursor.executemany("INSERT INTO user_info VALUES(?, ?)", user_info_property)
         #Create account_info table and add first account
         db_cursor.execute("CREATE TABLE account_info(account_id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, account_type TEXT, account_status TEXT, account_lastupdate TEXT)")
-        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"].decode(sys.stdin.encoding)+"')")
+        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"]+"')")
         #Create change_info table and add first money change
         db_cursor.execute("CREATE TABLE change_info(change_id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, change_type TEXT, change_date TEXT, change_description TEXT, change_amount INTEGER)")
-        db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"].decode(sys.stdin.encoding)+"', 'ACCOUNT_INITIATE_TEXT', "+data["money"].decode(sys.stdin.encoding)+")")
+        db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"].decode(sys.stdin.encoding)+"', 'ACCOUNT_INITIATE_TEXT', "+data["money"]+")")
 
     #return true and success code
     return True, "DB_SUCCESS_CREATE"
