@@ -1,26 +1,40 @@
-#!/usr/bin/python
-# -*- encoding: utf-8 -*-
+#!usr/bin/python
+#-*- encoding: utf-8 -*-
 
 import Tkinter as Tk
-import database as db
+from modules.quickstartwindow import Quickstartwindow as window_Quickstartwindow
+#from modules.mainwindow import Mainwindow as window_mainwindow
 
-#import extra window
-from main_quickstart import QuickStartWindow
-
-#Main&General window
-class RootApp:
+class AccountManagementApps(Tk.Tk):
     def __init__(self):
-        self.root = Tk.Tk()
+        #Make root tkinter window
+        Tk.Tk.__init__(self)
 
-        #Create Welcome screen
-        self.quickstartwindow = QuickStartWindow(self.root)
-        #Wait Welcome window to be closed (pause excute code)
-        self.root.wait_window(self.quickstartwindow)
-        #When Welcome window close, show root window and icon
-        self.root.deiconify()
+        #Summon the quick start window when the program is open newly
+        self.summon_quickstartwindow()
 
-        #Make the application looping
-        self.root.mainloop()
+        #Make application continue running
+        self.mainloop()
+
+    def summon_quickstartwindow(self):
+        """Summon the Quick start window and hide self 
+        -> use when the program is open"""
+        #Hide root window and icon
+        self.withdraw()
+        #Summon the quick start window
+        self.quickstartwindow = window_Quickstartwindow(self)
+
+    def summon_mainwindow(self, filename):
+        """Summon the Main window the work with account
+        (make root window to main window for user to work with account)
+        """
+        #Restore root window and icon
+        self.deiconify()
+
+    def exitrootprogram(self):
+        """Exit the program"""
+        #Destroy root window and program
+        self.destroy()
 
 if __name__ == "__main__":
-    RootApp()
+    AccountManagementApps()
