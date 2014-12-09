@@ -22,6 +22,8 @@ DATABASE_DIRECTORY_NAME = "accountdata"
 FILE_EXTENSION_DATABASE = ".db"
 #Full directory path that keep the database file
 DATABASE_DIRECTORY_PATH = ROOT_DIRECTORY_PATH+"\\"+DATABASE_DIRECTORY_NAME+"\\"
+#Global month number refer to string
+MONTH_3_STR_TO_INT = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6, "JUL": 7, "AUG": 8, "SEP": 9, "SEPT": 9, "OCT": 10, "NOV": 11, "DEC": 12}
 
 class Mainwindow:
     def __init__(self):
@@ -76,8 +78,8 @@ class Addnewaccountwindow(Tk.Toplevel):
         if result[0]:
             #if parent is quick start window, simply add new account widget to quick start window
             if repr(self.parent) == "quickstartwindow":
-                #Add account widget inside list
-                self.parent.addwidget_singleaccount(self.parent.accountlist_frame, result[2])
+                #Refresh the quick start window
+                self.parent.refreshthiswindow()
             #Close this window
             self.destroy()
         else:
