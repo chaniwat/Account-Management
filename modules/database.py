@@ -6,6 +6,28 @@ import os, md5, time
 from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, \
                        DATABASE_DIRECTORY_PATH
 
+class database:
+    def __init__(self):
+        #Set attribute
+        self.connectresult = None
+
+    def connectdatabase(self, filename):
+        """Connect to database file"""
+        self.connectresult = sql.connect(filename)
+
+    def closedatabase(self):
+        """Close the connection to database
+
+        Result:
+            database not connect when try to close the connection: False, 'DB_ERR_NOT_CONNECT'
+            close connection success: True,  
+        """
+        if not self.connectresult:
+            return (False, "DB_ERR_NOT_CONNECT")
+        else:
+            return (True, "DB_SUCCESS_CLOSECONNECT")
+
+#Normal Function -> use mostly in quick start window
 def createnewaccount(data):
     """Create a new account (new database file) to manage a money of person
     data dict keywords:

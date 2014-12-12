@@ -4,7 +4,7 @@
 
 import Tkinter as Tk
 from modules.quickstartwindow import Quickstartwindow as window_Quickstartwindow
-#from modules.mainwindow import Mainwindow as window_mainwindow
+from modules.mainwindow import Mainwindow as window_Mainwindow
 
 class AccountManagementApps(Tk.Tk):
     def __init__(self):
@@ -31,6 +31,8 @@ class AccountManagementApps(Tk.Tk):
         """
         #Restore root window and icon
         self.deiconify()
+        #Summon the main window inside the root
+        self.mainwindow = window_Mainwindow(self, filename)
 
     def exitrootprogram(self):
         """Exit the program"""
