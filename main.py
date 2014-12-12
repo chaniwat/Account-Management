@@ -1,5 +1,6 @@
 #!usr/bin/python
 #-*- encoding: utf-8 -*-
+#Wad the duck!
 
 import Tkinter as Tk
 from modules.quickstartwindow import Quickstartwindow as window_Quickstartwindow
