@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import Tkinter as Tk
+import tkFont
 import database as db
 import os, time
 from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, \
@@ -23,6 +24,9 @@ class Quickstartwindow(Tk.Toplevel):
         #Prevent user to resize this window
         self.resizable(0, 0)
 
+        #TkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=20)
+
         #Create an empty frame for list the user
         self.accountlist_frame = Tk.Frame(self)
         self.accountlist_frame.config(
@@ -35,7 +39,7 @@ class Quickstartwindow(Tk.Toplevel):
         self.listcreateduser(self.accountlist_frame)
 
         #Create Button for adding new user
-        Tk.Button(self, text="Add user", width=70, height=4, command=self.summon_addnewuserwindow).pack(fill="x")
+        Tk.Button(self, text="Add user", width=60, height=4, command=self.summon_addnewuserwindow, ).pack(fill="x")
 
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
@@ -88,10 +92,10 @@ class Quickstartwindow(Tk.Toplevel):
             frame_temp = Tk.Frame(parent)
             frame_temp.pack()
             #Create Label and Button
-            Tk.Label(frame_temp, text=data["USER_NAME"]).pack()
+            Tk.Label(frame_temp, text=data["USER_NAME"], font=self.customFont).pack()
             frame_temp_btn = Tk.Frame(frame_temp)
             frame_temp_btn.pack()
-            Tk.Button(frame_temp_btn, text=filename, command=lambda filename=filename: self.selectuser(filename)).pack(fill="x", side="left")
+            Tk.Button(frame_temp_btn, text="Login", command=lambda filename=filename: self.selectuser(filename)).pack(fill="x", side="left")
             Tk.Button(frame_temp_btn, text="Delete", command=lambda filename=filename: self.deleteuser(filename)).pack(fill="x", side="left")
 
     def selectuser(self, filename):
