@@ -22,7 +22,7 @@ class Quickstartwindow(Tk.Toplevel):
         #Focus to self
         self.focus_set()
         #Prevent user to resize this window
-        self.resizable(0, 0)
+        self.minsize(400, 400)
 
         #tkFont
         self.customFont = tkFont.Font(family="Browallia New", size=20)
@@ -33,13 +33,13 @@ class Quickstartwindow(Tk.Toplevel):
             width = 0,
             height = 0
         )
-        self.accountlist_frame.pack()
+        self.accountlist_frame.pack(fill="x")
 
         #Add user widget into frame that is for the list of user
         self.listcreateduser(self.accountlist_frame)
 
         #Create Button for adding new user
-        Tk.Button(self, text="Add user", width=60, height=4, command=self.summon_addnewuserwindow ).pack(fill="x")
+        Tk.Button(self, text="เพิ่มผู้ใช้ใหม่", bd=4, width=30, height=1, command=self.summon_addnewuserwindow, font=self.customFont).pack(side="bottom", fill="x")
 
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
@@ -89,10 +89,10 @@ class Quickstartwindow(Tk.Toplevel):
             #Convert data tuple to dict
             data = dict(data[1])
             #Create Frame
-            frame_temp = Tk.Frame(parent)
-            frame_temp.pack()
+            frame_temp = Tk.Frame(parent, bd=2, pady=10, relief="ridge")
+            frame_temp.pack(expand=1, fill="x")
             #Create Label and Button
-            Tk.Label(frame_temp, text=data["USER_NAME"], font=self.customFont).pack()
+            Tk.Label(frame_temp, text=data["USER_NAME"]+" "+data["USER_SURNAME"], font=self.customFont).pack()
             frame_temp_btn = Tk.Frame(frame_temp)
             frame_temp_btn.pack()
             Tk.Button(frame_temp_btn, text="Login", command=lambda filename=filename: self.selectuser(filename)).pack(padx=6, side="left")

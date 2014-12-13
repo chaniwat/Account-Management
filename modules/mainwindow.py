@@ -10,7 +10,7 @@
 import Tkinter as Tk
 import database as db
 import sys, os, md5, time
-from adduserwindow import Addnewuserwindow as window_Addnewuserwindow
+from addaccountwindow import Addnewaccountwindow as window_Addnewaccountwindow
 
 #Global Variable use cross the program
 #Full directory path that keep core file
@@ -29,6 +29,8 @@ MONTH_3_STR_TO_INT = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6
 #Main window class
 class Mainwindow:
     def __init__(self, root, filename):
+        print filename
+
         #Connect to database file
         self.database = db.database()
         self.database.connectdatabase(filename)
@@ -80,6 +82,16 @@ class Mainwindow:
         self.database.closedatabase()
         self.root.destroy()
 
+    def newaccount(self):
+        """summon the add new user window"""
+        self.root.wait_window(window_Addnewaccountwindow(self, self.root))
+
+    def closethisaccount(self):
+        print "closethisaccount"
+
+    def deletethisaccount(self):
+        print "deletethisaccount"
+
 #By Section Class
 #Main Menu
 class Main_menubar(Tk.Menu):
@@ -97,8 +109,6 @@ class Main_menubar(Tk.Menu):
         #Program menu
         self.programmenu = Tk.Menu(self, tearoff=0)
         self.programmenu.add_command(label="เปลี่ยนผู้ใช้", command=lambda: self.swapuser())
-        self.programmenu.add_command(label="แก้ไขผู้ใช้", command=lambda: hello())
-        self.programmenu.add_command(label="ลบผู้ใช้นี้", command=lambda: hello())
         self.programmenu.add_separator()
         self.programmenu.add_command(label="ออกจากโปรแกรม", command=lambda: self.exitprogram())
         self.add_cascade(label="โปรแกรม", menu=self.programmenu)
@@ -111,7 +121,6 @@ class Main_menubar(Tk.Menu):
 
         #account menu
         self.accountmenu = Tk.Menu(self, tearoff=0)
-        self.accountmenu.add_command(label="แก้ไขบัญชี", command=lambda: hello())
         self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: hello())
         self.accountmenu.add_command(label="ปิดบัญชี" ,command=lambda: hello())
         self.accountmenu.add_command(label="ลบบัญชี" ,command=lambda: hello())
@@ -198,10 +207,13 @@ class Main_accountsection(Tk.Frame):
         Tk.Frame(self, width=2, bd=1, relief="sunken").pack(side="left", fill="y", padx=10, pady=10)
 
         #Create button to edit the current select account
-        Tk.Button(self, text="แกไขบัญชีปัจจุบัน", command=self.editthisaccount).pack(padx=5, side="left")
+        Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount).pack(padx=5, side="left")
+
+        #Create button to close the current select account
+        Tk.Button(self, text="ปิดบัญชีปัจจุบัน", command=self.main.closethisaccount).pack(padx=5, side="left")
 
         #Create button to delete the current select account
-        Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.deletethisaccount).pack(padx=5, side="left")
+        Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.main.deletethisaccount).pack(padx=5, side="left")
 
     def changedatareport(self):
         """Change data to report to select account"""
@@ -213,12 +225,6 @@ class Main_accountsection(Tk.Frame):
         #Set and refrest data report frame
         self.main.database.set_currentaccountid(currentaccountselect_id)
         self.main.refreshdata()
-
-    def editthisaccount(self):
-        pass
-
-    def deletethisaccount(self):
-        pass
 
 #Account property section
 class Main_accountpropertysection(Tk.Frame):

@@ -39,6 +39,20 @@ class database:
         #Return result
         return True, result
 
+    def addaccount(self, data):
+        """add an account for user
+
+        data dict keywords:
+        name (account name),
+        type (account type), 
+        initmoney (start money for this account)
+        """
+        #account_info table
+        self.cursor.execute("INSERT INTO account_info VALUES(NULL, '"+data["name"]+"', '"+data["type"]+"', 'CON', '"+time.strftime("%d-%m-%Y")+"', "+data["initmoney"]+")")
+        self.connectresult.commit()
+
+        return True
+
     def set_currentaccountid(self, account_id=1):
         """Set the current account to show to user"""
         self.currentaccountid = account_id
