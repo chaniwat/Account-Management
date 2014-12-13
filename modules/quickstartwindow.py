@@ -35,7 +35,7 @@ class Quickstartwindow(Tk.Toplevel):
         self.listcreateduser(self.accountlist_frame)
 
         #Create Button for adding new user
-        Tk.Button(self, text="Add user", width=70, height=4, command=self.summon_addnewuserwindow).pack(fill="x")
+        Tk.Button(self, text="Add user", width=70, height=4, command=self.summon_addnewuserwindow, highlightcolor=green).pack(fill="x")
 
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
