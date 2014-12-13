@@ -42,7 +42,10 @@ class Mainwindow:
                 self.accountlist.append((account[0], account[1]))
 
         #Set current account (default account_id is 1 => wallet)
-        self.set_currentaccount()
+        self.database.set_currentaccountid(1)
+
+        #Get current account type
+        print self.database.get_currentaccounttype()
 
         #SETTING GUI --------------------------------------------------------------------------------------
         #Temporary variable to save the reference to root
@@ -50,6 +53,8 @@ class Mainwindow:
 
         #set minsize
         self.root.minsize(800, 500)
+        #Set title
+        self.root.title("Account-Management")
 
         #Create menubar
         self.menubar = Main_menubar(self, self.root) 
@@ -58,22 +63,17 @@ class Mainwindow:
         self.account_section = Main_accountsection(self, self.root)
 
         #Main section
-        self.main_section_frame = Main_mainsection(self, self.root, self.currentaccount)
+        self.main_section_frame = Main_mainsection(self, self.root, self.database.get_currentaccountid())
         #END GUI ------------------------------------------------------------------------------------------
 
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.root.protocol("WM_DELETE_WINDOW", self.closeprogram)
 
-    def set_currentaccount(self, account_id="1"):
-        """Set the current account to show to user"""
-        self.currentaccount = account_id
-        #run a refresh code to rebuild data by using this wallet
-
     def refreshdata(self):
         """refresh main section for rebuild new specific data"""
         self.main_section_frame.pack_forget()
         self.main_section_frame.destroy
-        self.main_section_frame = Main_mainsection(self, self.root, self.currentaccount)
+        self.main_section_frame = Main_mainsection(self, self.root, self.database.get_currentaccountid())
 
     def closeprogram(self):
         """Close program"""
@@ -94,13 +94,43 @@ class Main_menubar(Tk.Menu):
         Tk.Menu.__init__(self, self.parent)
 
         #Add menu and submenu
-        self.add_command(label="Main", command=self.hello)
+        #Program menu
+        self.programmenu = Tk.Menu(self, tearoff=0)
+        self.programmenu.add_command(label="เปลี่ยนผู้ใช้", command=lambda: self.swapuser())
+        self.programmenu.add_command(label="แก้ไขผู้ใช้", command=lambda: hello())
+        self.programmenu.add_command(label="ลบผู้ใช้นี้", command=lambda: hello())
+        self.programmenu.add_separator()
+        self.programmenu.add_command(label="ออกจากโปรแกรม", command=lambda: self.exitprogram())
+        self.add_cascade(label="โปรแกรม", menu=self.programmenu)
+
+        #user menu
+        self.usermenu = Tk.Menu(self, tearoff=0)
+        self.usermenu.add_command(label="สรุปเงินทั้งหมด", command=lambda: hello())
+        self.usermenu.add_command(label="ประมาณเงินคงเหลือ", command=lambda: hello())
+        self.add_cascade(label="ผู้ใช้", menu=self.usermenu)
+
+        #account menu
+        self.accountmenu = Tk.Menu(self, tearoff=0)
+        self.accountmenu.add_command(label="แก้ไขบัญชี", command=lambda: hello())
+        self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: hello())
+        self.accountmenu.add_command(label="ปิดบัญชี" ,command=lambda: hello())
+        self.accountmenu.add_command(label="ลบบัญชี" ,command=lambda: hello())
+        self.add_cascade(label="บัญชี", menu=self.accountmenu)
 
         #Set parent to use this menubar
         self.parent.config(menu=self)
 
-    def hello(self):
-        print "hello"
+    def swapuser(self):
+        """close main window and open the quick start window
+        reopen program"""
+        #disconnect from current connect database
+        self.main.database.closedatabase()
+        #call reopen program
+        self.main.root.reopenprogram()
+
+    def exitprogram(self):
+        """exit the program"""
+        self.main.closeprogram()
 
 #Main Section
 class Main_mainsection(Tk.Frame):
@@ -142,16 +172,53 @@ class Main_accountsection(Tk.Frame):
         self.main = main
 
         #Create frame
-        Tk.Frame.__init__(self, self.parent, height=80, bg="blue")
+        Tk.Frame.__init__(self, self.parent, bd=2, relief="ridge", padx=15)
         self.pack(fill="x")
 
-        #Create button
-        self.refreshbtn = Tk.Button(self, text="refresh", command=lambda: self.changedatareport())
-        self.refreshbtn.pack()
+        #Create Label for account selection
+        Tk.Label(self, text="เลือกบัญชี").pack(side="left", pady=25)
+
+        #Create selection for current account to show
+        accounts = list()
+        #Unload variable
+        for account in self.main.accountlist:
+            accounts.append(account[1])
+        #Create selection menu
+        self.currentaccountselect = Tk.StringVar(self)
+        self.currentaccountselect.set(accounts[0])
+
+        self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect) + tuple(accounts))
+        self.accountselectmenu.config(width=30)
+        self.accountselectmenu.pack(padx=10, pady=25, side="left")
+
+        #Create button to view the current select account
+        Tk.Button(self, text="ดูบัญชี", command=self.changedatareport).pack(padx=5, pady=25, side="left")
+
+        #Create frame to make a separator
+        Tk.Frame(self, width=2, bd=1, relief="sunken").pack(side="left", fill="y", padx=10, pady=10)
+
+        #Create button to edit the current select account
+        Tk.Button(self, text="แกไขบัญชีปัจจุบัน", command=self.editthisaccount).pack(padx=5, side="left")
+
+        #Create button to delete the current select account
+        Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.deletethisaccount).pack(padx=5, side="left")
 
     def changedatareport(self):
-        self.main.set_currentaccount("k")
+        """Change data to report to select account"""
+        #Find account id
+        for account in self.main.accountlist:
+            if self.currentaccountselect.get() == account[1]:
+                currentaccountselect_id = account[0]
+                break
+        #Set and refrest data report frame
+        self.main.database.set_currentaccountid(currentaccountselect_id)
         self.main.refreshdata()
+
+    def editthisaccount(self):
+        pass
+
+    def deletethisaccount(self):
+        pass
 
 #Account property section
 class Main_accountpropertysection(Tk.Frame):

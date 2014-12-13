@@ -39,5 +39,12 @@ class AccountManagementApps(Tk.Tk):
         #Destroy root window and program
         self.destroy()
 
+    def reopenprogram(self):
+        """Reopen the program"""
+        #Destroy root window and program
+        self.destroy()
+        #Rerun class
+        AccountManagementApps()
+
 if __name__ == "__main__":
     AccountManagementApps()

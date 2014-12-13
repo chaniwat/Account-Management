@@ -11,6 +11,7 @@ class database:
         #Set attribute
         self.connectresult = None
         self.cursor = None
+        self.currentaccountid = None
 
     def connectdatabase(self, filename):
         """Connect to database file"""
@@ -22,7 +23,7 @@ class database:
 
         Result:
             database not connect when try to close the connection: False, 'DB_ERR_NOT_CONNECT'
-            close connection success: True,  
+            close connection success: True, 
         """
         if not self.connectresult:
             return (False, "DB_ERR_NOT_CONNECT")
@@ -38,6 +39,20 @@ class database:
         #Return result
         return True, result
 
+    def set_currentaccountid(self, account_id=1):
+        """Set the current account to show to user"""
+        self.currentaccountid = account_id
+
+    def get_currentaccountid(self):
+        """return the current account that show to user"""
+        return self.currentaccountid
+
+    def get_currentaccounttype(self):
+        """return the current account type that show to user"""
+        self.cursor.execute("SELECT account_type FROM account_info WHERE account_id = "+str(self.currentaccountid))
+        result = self.cursor.fetchone()[0]
+
+        return result
 
 #Normal Function -> use mostly in quick start window
 def createnewaccount(data):
