@@ -6,7 +6,7 @@ import database as db
 import os, time
 from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, \
                        DATABASE_DIRECTORY_PATH, MONTH_3_STR_TO_INT
-from mainwindow import Addnewuserwindow as window_Addnewuserwindow
+from adduserwindow import Addnewuserwindow as window_Addnewuserwindow
 
 class Quickstartwindow(Tk.Toplevel):
     def __init__(self, root):
