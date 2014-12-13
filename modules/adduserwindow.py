@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import Tkinter as Tk
+import tkFont
 import database as db
 import md5, time
 
@@ -14,6 +15,8 @@ class Addnewuserwindow(Tk.Toplevel):
         Tk.Toplevel.__init__(self, parent)
         #Set title
         self.title("Create new user")
+
+        self.customFont = tkFont.Font(family="Browallia New", size=20)
 
         #Overlay and freeze the parent
         self.transient(self.parent)
@@ -38,22 +41,22 @@ class Addnewuserwindow(Tk.Toplevel):
             frame_temp = Tk.Frame(self.input_form)
             frame_temp.pack()
             #Create Label
-            Tk.Label(frame_temp, text=label).pack()
+            Tk.Label(frame_temp, text=label, font=self.customFont).pack()
             #Switch by datakey
             if datakey == "has_pwd":
                 #Create a variable and checkbox for pwd entry to toggle state
                 self.pwdstate = Tk.IntVar()
-                self.textboxs[datakey] = Tk.Checkbutton(frame_temp, text="มี", variable=self.pwdstate, command=self.togglepasswordtextbox)
+                self.textboxs[datakey] = Tk.Checkbutton(frame_temp, text="มี", variable=self.pwdstate, command=self.togglepasswordtextbox, font=self.customFont)
                 self.textboxs[datakey].pack()
             elif datakey == "birthday":
                 birthframe_temp = Tk.Frame(frame_temp)
                 birthframe_temp.pack()
                 self.textboxs[datakey+"-d"] = Tk.Entry(birthframe_temp, width=5)
                 self.textboxs[datakey+"-d"].pack(side="left")
-                Tk.Label(birthframe_temp, text="-").pack(side="left")
+                Tk.Label(birthframe_temp, text="-", font=self.customFont).pack(side="left")
                 self.textboxs[datakey+"-m"] = Tk.Entry(birthframe_temp, width=5)
                 self.textboxs[datakey+"-m"].pack(side="left")
-                Tk.Label(birthframe_temp, text="-").pack(side="left")
+                Tk.Label(birthframe_temp, text="-", font=self.customFont).pack(side="left")
                 self.textboxs[datakey+"-y"] = Tk.Entry(birthframe_temp, width=5)
                 self.textboxs[datakey+"-y"].pack(side="left")
             else:
@@ -64,8 +67,11 @@ class Addnewuserwindow(Tk.Toplevel):
                 if datakey == "pwd":
                     self.textboxs["pwd"].config(state="disabled")
 
+        #Create empty frame to create some space
+        Tk.Frame(self.input_form, height=15).pack()
+
         #Create Button to submit the from
-        Tk.Button(self.input_form, width=80, text="Create new user", command=self.createnewuser, height=3).pack(fill="x")
+        Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=self.createnewuser, font=self.customFont).pack(fill="x")
 
     def createnewuser(self):
         #Get all data in textbox (entry widget) into dict

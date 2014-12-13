@@ -11,6 +11,7 @@ class database:
         #Set attribute
         self.connectresult = None
         self.cursor = None
+        self.currentaccountid = None
 
     def connectdatabase(self, filename):
         """Connect to database file"""
@@ -22,7 +23,7 @@ class database:
 
         Result:
             database not connect when try to close the connection: False, 'DB_ERR_NOT_CONNECT'
-            close connection success: True,  
+            close connection success: True, 
         """
         if not self.connectresult:
             return (False, "DB_ERR_NOT_CONNECT")
@@ -38,6 +39,51 @@ class database:
         #Return result
         return True, result
 
+    def addaccount(self, data):
+        """add an account for user
+
+        data dict keywords:
+        name (account name),
+        type (account type), 
+        initmoney (start money for this account)
+        """
+        #account_info table
+        self.cursor.execute("INSERT INTO account_info VALUES(NULL, '"+data["name"]+"', '"+data["type"]+"', 'CON', '"+time.strftime("%d-%m-%Y")+"', "+data["initmoney"]+")")
+        self.connectresult.commit()
+
+        return True
+
+    def deleteaccount(self, account_id):
+        """Delete account by id"""
+        if account_id == 1:
+            print "can't delete this account because this is a main account"
+            return False
+        else:
+            #account_info table
+            self.cursor.execute("DELETE FROM account_info WHERE account_id="+str(account_id))
+            self.connectresult.commit()
+            self.set_currentaccountid()
+            return True
+
+    def set_currentaccountid(self, account_id=1):
+        """Set the current account to show to user"""
+        self.currentaccountid = account_id
+
+    def get_currentaccountid(self):
+        """return the current account that show to user"""
+        return self.currentaccountid
+
+    def get_currentaccountname(self):
+        """return the current account name that show to user"""
+        self.cursor.execute("SELECT account_name FROM account_info WHERE account_id = "+str(self.currentaccountid))
+        result = self.cursor.fetchone()[0]
+        return result
+
+    def get_currentaccounttype(self):
+        """return the current account type that show to user"""
+        self.cursor.execute("SELECT account_type FROM account_info WHERE account_id = "+str(self.currentaccountid))
+        result = self.cursor.fetchone()[0]
+        return result
 
 #Normal Function -> use mostly in quick start window
 def createnewaccount(data):
@@ -98,8 +144,8 @@ def createnewaccount(data):
         db_cursor.execute("CREATE TABLE user_info(property TEXT, vaule TEXT)")
         db_cursor.executemany("INSERT INTO user_info VALUES(?, ?)", user_info_property)
         #account_info table
-        db_cursor.execute("CREATE TABLE account_info(account_id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, account_type TEXT, account_status TEXT, account_lastupdate TEXT)")
-        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"]+"')")
+        db_cursor.execute("CREATE TABLE account_info(account_id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, account_type TEXT, account_status TEXT, account_lastupdate TEXT, account_currentmoney INTEGER)")
+        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"]+"', "+data["initmoney"]+")")
         #change_info table
         db_cursor.execute("CREATE TABLE change_info(change_id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, change_type TEXT, change_data TEXT, change_description TEXT, change_amount INTEGER)")
         db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"]+"', 'ACCOUNT_INITIATE_TEXT', "+data["initmoney"]+")")
