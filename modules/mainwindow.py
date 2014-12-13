@@ -38,9 +38,6 @@ class Mainwindow:
         #Set current account (default account_id is 1 => wallet)
         self.database.set_currentaccountid(1)
 
-        #Get current account type
-        print self.database.get_currentaccounttype()
-
         #SETTING GUI --------------------------------------------------------------------------------------
         #Temporary variable to save the reference to root
         self.root = root
@@ -156,6 +153,9 @@ class Main_mainsection(Tk.Frame):
 
         #Temporary variable to save the reference to mainwindow
         self.main = main
+
+        #Get current account type
+        print self.main.database.get_currentaccounttype()
 
         #Create frame
         Tk.Frame.__init__(self, self.parent)
