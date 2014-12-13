@@ -22,7 +22,7 @@ class Quickstartwindow(Tk.Toplevel):
         #Focus to self
         self.focus_set()
         #Prevent user to resize this window
-        self.minsize(400, 400)
+        self.resizable(0, 0)
 
         #tkFont
         self.customFont = tkFont.Font(family="Browallia New", size=20)

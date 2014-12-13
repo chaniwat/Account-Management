@@ -113,8 +113,8 @@ def createnewaccount(data):
         db_cursor.execute("CREATE TABLE user_info(property TEXT, vaule TEXT)")
         db_cursor.executemany("INSERT INTO user_info VALUES(?, ?)", user_info_property)
         #account_info table
-        db_cursor.execute("CREATE TABLE account_info(account_id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, account_type TEXT, account_status TEXT, account_lastupdate TEXT)")
-        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"]+"')")
+        db_cursor.execute("CREATE TABLE account_info(account_id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, account_type TEXT, account_status TEXT, account_lastupdate TEXT, account_currentmoney INTEGER)")
+        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"]+"', "+data["initmoney"]+")")
         #change_info table
         db_cursor.execute("CREATE TABLE change_info(change_id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, change_type TEXT, change_data TEXT, change_description TEXT, change_amount INTEGER)")
         db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"]+"', 'ACCOUNT_INITIATE_TEXT', "+data["initmoney"]+")")
