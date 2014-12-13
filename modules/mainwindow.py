@@ -28,6 +28,9 @@ MONTH_3_STR_TO_INT = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6
 #Main window class
 class Mainwindow:
     def __init__(self, root, filename):
+        self.currentaccount = None
+        self.set_currentaccount()
+
         #SETTING GUI --------------------------------------------------------------------------------------
         #Temporary variable to save the reference to root
         self.root = root
@@ -42,23 +45,19 @@ class Mainwindow:
         self.account_section = Main_accountsection(self, self.root)
 
         #Main section
-        self.main_section_frame = Main_mainsection(self, self.root)
+        self.main_section_frame = Main_mainsection(self, self.root, self.currentaccount)
         #END GUI ------------------------------------------------------------------------------------------
-
-        #BACKEND APPLICATION CODE -------------------------------------------------------------------------
-        self.currentaccount = None
-        #END APPLICATION CODE -----------------------------------------------------------------------------
 
     def set_currentaccount(self, wallet="ACC_WALLET"):
         """Set the current account to show to user"""
         self.currentaccount = wallet
         #run a refresh code to rebuild data by using this wallet
 
-    def refresh(self):
-        """refresh this frame (self)"""
+    def refreshdata(self):
+        """refresh main section for rebuild new specific data"""
         self.main_section_frame.pack_forget()
         self.main_section_frame.destroy
-        self.main_section_frame = Main_mainsection(self, self.root, "complete")
+        self.main_section_frame = Main_mainsection(self, self.root, self.currentaccount)
 
 #By Section Class
 #Main Menu
@@ -84,7 +83,7 @@ class Main_menubar(Tk.Menu):
 
 #Main Section
 class Main_mainsection(Tk.Frame):
-    def __init__(self, main, parent, data="test"):
+    def __init__(self, main, parent, accountdata):
         #Temporary variable to save the reference to parent
         self.parent = parent
 
@@ -103,14 +102,14 @@ class Main_mainsection(Tk.Frame):
         self.rightmain_section_frame = Tk.Frame(self, bg="red")
         self.rightmain_section_frame.pack(side="left", fill="both", expand=1)
 
-        #account property section
-        self.account_property_section = Main_accountpropertysection(self.main, self.leftmain_section_frame)
-
         #viewtype section
         self.viewtype_section = Main_viewtypesection(self.main, self.leftmain_section_frame)
 
+        #account property section
+        self.account_property_section = Main_accountpropertysection(self.main, self.leftmain_section_frame)
+
         #datareport section
-        self.datareport_section = Main_datareportsection(self.main, self.rightmain_section_frame, data)
+        self.datareport_section = Main_datareportsection(self.main, self.rightmain_section_frame, accountdata)
 
 #Account section
 class Main_accountsection(Tk.Frame):
@@ -126,8 +125,12 @@ class Main_accountsection(Tk.Frame):
         self.pack(fill="x")
 
         #Create button
-        self.refreshbtn = Tk.Button(self, text="refresh", command=lambda: self.main.refresh())
+        self.refreshbtn = Tk.Button(self, text="refresh", command=lambda: self.changedatareport())
         self.refreshbtn.pack()
+
+    def changedatareport(self):
+        self.main.set_currentaccount("k")
+        self.main.refreshdata()
 
 #Account property section
 class Main_accountpropertysection(Tk.Frame):
@@ -157,7 +160,7 @@ class Main_viewtypesection(Tk.Frame):
 
 #Data report table section + support class
 class Main_datareportsection:
-    def __init__(self, main, parent, data):
+    def __init__(self, main, parent, accountdata):
         #Temporary variable to save the reference to parent
         self.parent = parent
 
@@ -165,7 +168,7 @@ class Main_datareportsection:
         self.main = main
 
         #Create label
-        self.label1 = Tk.Label(self.parent, text=data)
+        self.label1 = Tk.Label(self.parent, text=accountdata)
         self.label1.pack()
 
 #Dedicated window class
