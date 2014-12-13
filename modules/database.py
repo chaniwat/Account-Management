@@ -10,10 +10,12 @@ class database:
     def __init__(self):
         #Set attribute
         self.connectresult = None
+        self.cursor = None
 
     def connectdatabase(self, filename):
         """Connect to database file"""
         self.connectresult = sql.connect(filename)
+        self.cursor = self.connectresult.cursor()
 
     def closedatabase(self):
         """Close the connection to database
@@ -26,6 +28,16 @@ class database:
             return (False, "DB_ERR_NOT_CONNECT")
         else:
             return (True, "DB_SUCCESS_CLOSECONNECT")
+
+    def listaccount(self):
+        """Return the list of all wallet"""
+        #Execute sql script to get the account info (account_info table) of this account and make it as a dict
+        self.cursor.execute("SELECT account_id, account_name FROM account_info ORDER BY account_id ASC")
+        result = self.cursor.fetchall()
+
+        #Return result
+        return True, result
+
 
 #Normal Function -> use mostly in quick start window
 def createnewaccount(data):

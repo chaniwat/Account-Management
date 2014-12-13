@@ -28,7 +28,19 @@ MONTH_3_STR_TO_INT = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6
 #Main window class
 class Mainwindow:
     def __init__(self, root, filename):
-        self.currentaccount = None
+        #Connect to database file
+        self.database = db.database()
+        self.database.connectdatabase(filename)
+
+        #list the account of this user
+        self.accountlist = self.database.listaccount()
+        if self.accountlist[0]:
+            temp = self.accountlist[1]
+            self.accountlist = list()
+            for account in temp:
+                self.accountlist.append((account[0], account[1]))
+
+        #Set current account (default account_id is 1 => wallet)
         self.set_currentaccount()
 
         #SETTING GUI --------------------------------------------------------------------------------------
@@ -48,9 +60,12 @@ class Mainwindow:
         self.main_section_frame = Main_mainsection(self, self.root, self.currentaccount)
         #END GUI ------------------------------------------------------------------------------------------
 
-    def set_currentaccount(self, wallet="ACC_WALLET"):
+        #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
+        self.root.protocol("WM_DELETE_WINDOW", self.closeprogram)
+
+    def set_currentaccount(self, account_id="1"):
         """Set the current account to show to user"""
-        self.currentaccount = wallet
+        self.currentaccount = account_id
         #run a refresh code to rebuild data by using this wallet
 
     def refreshdata(self):
@@ -58,6 +73,11 @@ class Mainwindow:
         self.main_section_frame.pack_forget()
         self.main_section_frame.destroy
         self.main_section_frame = Main_mainsection(self, self.root, self.currentaccount)
+
+    def closeprogram(self):
+        """Close program"""
+        self.database.closedatabase()
+        self.root.destroy()
 
 #By Section Class
 #Main Menu
@@ -196,27 +216,64 @@ class Addnewuserwindow(Tk.Toplevel):
         #Create an empty dict variable for keeping the entry widget that used for user to input
         self.textboxs = dict()
         #Data key
-        self.datakeys = ["name", "surname", "nickname", "birthday", "has_pwd", "pwd", "createdate", "initmoney"]
+        self.datakeys = ["name", "surname", "nickname", "birthday", "has_pwd", "pwd", "initmoney"]
+        self.datakeys_label = ["ชื่อ", "นามสกุล", "ชื่อเล่น", "วันเกิด (DD-MM-YYYY | ปี ค.ศ.)", "ตั้งรหัสผ่านหรือไม่", "รหัสผ่าน", "เงินปัจจุบัน"]
 
         #Create label and entry to receive the user input for create new user
-        for datakey in self.datakeys:
+        for datakey, label in zip(self.datakeys, self.datakeys_label):
             #Create frame
             frame_temp = Tk.Frame(self.input_form)
             frame_temp.pack()
             #Create Label
-            Tk.Label(frame_temp, text=datakey).pack()
-            #Create entry and set variable to reference to this new entry that created
-            self.textboxs[datakey] = Tk.Entry(frame_temp)
-            self.textboxs[datakey].pack()
+            Tk.Label(frame_temp, text=label).pack()
+            #Switch by datakey
+            if datakey == "has_pwd":
+                #Create a variable and checkbox for pwd entry to toggle state
+                self.pwdstate = Tk.IntVar()
+                self.textboxs[datakey] = Tk.Checkbutton(frame_temp, text="มี", variable=self.pwdstate, command=self.togglepasswordtextbox)
+                self.textboxs[datakey].pack()
+            elif datakey == "birthday":
+                birthframe_temp = Tk.Frame(frame_temp)
+                birthframe_temp.pack()
+                self.textboxs[datakey+"-d"] = Tk.Entry(birthframe_temp, width=5)
+                self.textboxs[datakey+"-d"].pack(side="left")
+                Tk.Label(birthframe_temp, text="-").pack(side="left")
+                self.textboxs[datakey+"-m"] = Tk.Entry(birthframe_temp, width=5)
+                self.textboxs[datakey+"-m"].pack(side="left")
+                Tk.Label(birthframe_temp, text="-").pack(side="left")
+                self.textboxs[datakey+"-y"] = Tk.Entry(birthframe_temp, width=5)
+                self.textboxs[datakey+"-y"].pack(side="left")
+            else:
+                #Create entry and set variable to reference to this new entry that created
+                self.textboxs[datakey] = Tk.Entry(frame_temp)
+                self.textboxs[datakey].pack()
+                #if datakey is pwd, let it disabled first
+                if datakey == "pwd":
+                    self.textboxs["pwd"].config(state="disabled")
 
         #Create Button to submit the from
-        Tk.Button(self.input_form, width=80, text="Create new user", command=self.createnewuser).pack(fill="x")
+        Tk.Button(self.input_form, width=80, text="Create new user", command=self.createnewuser, height=3).pack(fill="x")
 
     def createnewuser(self):
         #Get all data in textbox (entry widget) into dict
         data = dict()
-        for key in self.textboxs.keys():
-            data[key] = self.textboxs[key].get()
+        for key in self.datakeys:
+            #if key is has_pwd, do special get
+            if key == "has_pwd":
+                data[key] = ["False", "True"][self.pwdstate.get()]
+            elif key == "birthday":
+                data[key] = self.textboxs[key+"-d"].get()+"-"+self.textboxs[key+"-m"].get()+"-"+self.textboxs[key+"-y"].get()
+            else:
+                #If key is pwd, insert data depend on its state
+                if key == "pwd":
+                    if self.pwdstate.get():
+                        data[key] = self.textboxs[key].get()
+                    else:
+                        data[key] = "None"
+                else:
+                    data[key] = self.textboxs[key].get()
+        #Get current date and insert into data
+        data["createdate"] = time.strftime("%d-%m-%Y")
         #Sent and receive the result to database to create new user
         result = db.createnewaccount(data)
         if result[0]:
@@ -228,3 +285,11 @@ class Addnewuserwindow(Tk.Toplevel):
             self.destroy()
         else:
             print result[1]
+
+    def togglepasswordtextbox(self):
+        """Check if has_pwd is true or not, toggle the disable state of pwd entry"""
+        if self.pwdstate.get() == 1:
+            self.textboxs["pwd"].config(state="normal")
+        else:
+            self.textboxs["pwd"].delete(0, Tk.END)
+            self.textboxs["pwd"].config(state="disabled")
