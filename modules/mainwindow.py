@@ -35,14 +35,6 @@ class Mainwindow:
         self.database = db.database()
         self.database.connectdatabase(filename)
 
-        #list the account of this user
-        self.accountlist = self.database.listaccount()
-        if self.accountlist[0]:
-            temp = self.accountlist[1]
-            self.accountlist = list()
-            for account in temp:
-                self.accountlist.append((account[0], account[1]))
-
         #Set current account (default account_id is 1 => wallet)
         self.database.set_currentaccountid(1)
 
@@ -59,10 +51,14 @@ class Mainwindow:
         self.root.title("Account-Management")
 
         #Create menubar
-        self.menubar = Main_menubar(self, self.root) 
+        self.menubar = Main_menubar(self, self.root)
+
+        #Create parent of account section frame
+        self.parentaccount_section = Tk.Frame(self.root)
+        self.parentaccount_section.pack(fill="x")
 
         #account section
-        self.account_section = Main_accountsection(self, self.root)
+        self.account_section = Main_accountsection(self, self.parentaccount_section)
 
         #Main section
         self.main_section_frame = Main_mainsection(self, self.root, self.database.get_currentaccountid())
@@ -74,7 +70,7 @@ class Mainwindow:
     def refreshdata(self):
         """refresh main section for rebuild new specific data"""
         self.main_section_frame.pack_forget()
-        self.main_section_frame.destroy
+        self.main_section_frame.destroy()
         self.main_section_frame = Main_mainsection(self, self.root, self.database.get_currentaccountid())
 
     def closeprogram(self):
@@ -85,6 +81,9 @@ class Mainwindow:
     def newaccount(self):
         """summon the add new user window"""
         self.root.wait_window(window_Addnewaccountwindow(self, self.root))
+        self.account_section.pack_forget()
+        self.account_section.destroy()
+        self.account_section = Main_accountsection(self, self.parentaccount_section)
 
     def closethisaccount(self):
         print "closethisaccount"
@@ -121,7 +120,7 @@ class Main_menubar(Tk.Menu):
 
         #account menu
         self.accountmenu = Tk.Menu(self, tearoff=0)
-        self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: hello())
+        self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: self.main.newaccount())
         self.accountmenu.add_command(label="ปิดบัญชี" ,command=lambda: hello())
         self.accountmenu.add_command(label="ลบบัญชี" ,command=lambda: hello())
         self.add_cascade(label="บัญชี", menu=self.accountmenu)
@@ -180,6 +179,14 @@ class Main_accountsection(Tk.Frame):
         #Temporary variable to save the reference to mainwindow
         self.main = main
 
+        #list the account of this user
+        self.accountlist = self.main.database.listaccount()
+        if self.accountlist[0]:
+            temp = self.accountlist[1]
+            self.accountlist = list()
+            for account in temp:
+                self.accountlist.append((account[0], account[1]))
+
         #Create frame
         Tk.Frame.__init__(self, self.parent, bd=2, relief="ridge", padx=15)
         self.pack(fill="x")
@@ -190,11 +197,11 @@ class Main_accountsection(Tk.Frame):
         #Create selection for current account to show
         accounts = list()
         #Unload variable
-        for account in self.main.accountlist:
+        for account in self.accountlist:
             accounts.append(account[1])
         #Create selection menu
         self.currentaccountselect = Tk.StringVar(self)
-        self.currentaccountselect.set(accounts[0])
+        self.currentaccountselect.set(self.accountlist[self.main.database.get_currentaccountid()-1][1])
 
         self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect) + tuple(accounts))
         self.accountselectmenu.config(width=30)
@@ -218,7 +225,7 @@ class Main_accountsection(Tk.Frame):
     def changedatareport(self):
         """Change data to report to select account"""
         #Find account id
-        for account in self.main.accountlist:
+        for account in self.accountlist:
             if self.currentaccountselect.get() == account[1]:
                 currentaccountselect_id = account[0]
                 break
