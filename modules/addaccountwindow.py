@@ -14,6 +14,9 @@ class Addnewaccountwindow(Tk.Toplevel):
         #Temporary variable to save the reference to parent
         self.parent = parent
 
+        #Pre-defined result for none action
+        self.result = False
+
         #Create new window that is the child of parent
         Tk.Toplevel.__init__(self, parent)
         #Set title
@@ -69,7 +72,7 @@ class Addnewaccountwindow(Tk.Toplevel):
             data["type"] = "ACC_POT"
         data["initmoney"] = self.moneybox.get()
 
-        result = self.main.database.addaccount(data)
+        self.result = self.main.database.addaccount(data)
 
-        if result:
+        if self.result:
             self.destroy()

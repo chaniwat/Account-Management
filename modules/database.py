@@ -53,6 +53,18 @@ class database:
 
         return True
 
+    def deleteaccount(self, account_id):
+        """Delete account by id"""
+        if account_id == 1:
+            print "can't delete this account because this is a main account"
+            return False
+        else:
+            #account_info table
+            self.cursor.execute("DELETE FROM account_info WHERE account_id="+str(account_id))
+            self.connectresult.commit()
+            self.set_currentaccountid()
+            return True
+
     def set_currentaccountid(self, account_id=1):
         """Set the current account to show to user"""
         self.currentaccountid = account_id
@@ -61,11 +73,16 @@ class database:
         """return the current account that show to user"""
         return self.currentaccountid
 
+    def get_currentaccountname(self):
+        """return the current account name that show to user"""
+        self.cursor.execute("SELECT account_name FROM account_info WHERE account_id = "+str(self.currentaccountid))
+        result = self.cursor.fetchone()[0]
+        return result
+
     def get_currentaccounttype(self):
         """return the current account type that show to user"""
         self.cursor.execute("SELECT account_type FROM account_info WHERE account_id = "+str(self.currentaccountid))
         result = self.cursor.fetchone()[0]
-
         return result
 
 #Normal Function -> use mostly in quick start window

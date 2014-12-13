@@ -80,16 +80,24 @@ class Mainwindow:
 
     def newaccount(self):
         """summon the add new user window"""
-        self.root.wait_window(window_Addnewaccountwindow(self, self.root))
-        self.account_section.pack_forget()
-        self.account_section.destroy()
-        self.account_section = Main_accountsection(self, self.parentaccount_section)
+        newaccountwindow = window_Addnewaccountwindow(self, self.root)
+        self.root.wait_window(newaccountwindow)
+        if newaccountwindow.result:
+            self.account_section.pack_forget()
+            self.account_section.destroy()
+            self.account_section = Main_accountsection(self, self.parentaccount_section)
 
     def closethisaccount(self):
         print "closethisaccount"
 
     def deletethisaccount(self):
-        print "deletethisaccount"
+        result = self.database.deleteaccount(self.database.get_currentaccountid())
+        print result
+        if result:
+            self.refreshdata()
+            self.account_section.pack_forget()
+            self.account_section.destroy()
+            self.account_section = Main_accountsection(self, self.parentaccount_section)
 
 #By Section Class
 #Main Menu
@@ -213,6 +221,10 @@ class Main_accountsection(Tk.Frame):
         #Create frame to make a separator
         Tk.Frame(self, width=2, bd=1, relief="sunken").pack(side="left", fill="y", padx=10, pady=10)
 
+        #Create Label for showing current account
+        self.accountnamelabel = Tk.Label(self, text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname())
+        self.accountnamelabel.pack(side="left", pady=25)
+
         #Create button to edit the current select account
         Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount).pack(padx=5, side="left")
 
@@ -231,6 +243,7 @@ class Main_accountsection(Tk.Frame):
                 break
         #Set and refrest data report frame
         self.main.database.set_currentaccountid(currentaccountselect_id)
+        self.accountnamelabel.config(text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname())
         self.main.refreshdata()
 
 #Account property section
