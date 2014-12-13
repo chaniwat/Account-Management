@@ -22,9 +22,9 @@ class Quickstartwindow(Tk.Toplevel):
         #Focus to self
         self.focus_set()
         #Prevent user to resize this window
-        self.resizable(0, 0)
+        self.minsize(400, 400)
 
-        #TkFont
+        #tkFont
         self.customFont = tkFont.Font(family="Browallia New", size=20)
 
         #Create an empty frame for list the user
@@ -39,7 +39,7 @@ class Quickstartwindow(Tk.Toplevel):
         self.listcreateduser(self.accountlist_frame)
 
         #Create Button for adding new user
-        Tk.Button(self, text="Add user", width=60, height=4, command=self.summon_addnewuserwindow, ).pack(fill="x")
+        Tk.Button(self, text="Add user", width=60, height=4, command=self.summon_addnewuserwindow ).pack(fill="x")
 
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
@@ -95,8 +95,8 @@ class Quickstartwindow(Tk.Toplevel):
             Tk.Label(frame_temp, text=data["USER_NAME"], font=self.customFont).pack()
             frame_temp_btn = Tk.Frame(frame_temp)
             frame_temp_btn.pack()
-            Tk.Button(frame_temp_btn, text="Login", command=lambda filename=filename: self.selectuser(filename)).pack(fill="x", side="left")
-            Tk.Button(frame_temp_btn, text="Delete", command=lambda filename=filename: self.deleteuser(filename)).pack(fill="x", side="left")
+            Tk.Button(frame_temp_btn, text="Login", command=lambda filename=filename: self.selectuser(filename)).pack(padx=6, side="left")
+            Tk.Button(frame_temp_btn, text="Delete", command=lambda filename=filename: self.deleteuser(filename)).pack(padx=6, side="left")
 
     def selectuser(self, filename):
         """Select user to work with and send filename to root for summon main window
