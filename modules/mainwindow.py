@@ -44,7 +44,7 @@ class Mainwindow:
         self.root = root
 
         #set minsize
-        self.root.minsize(800, 500)
+        self.root.minsize(1100, 600)
         #Set title
         self.root.title("Account-Management")
 
@@ -172,7 +172,7 @@ class Main_mainsection(Tk.Frame):
         self.leftmain_section_frame.pack(side="left", fill="y")
 
         #rightmain section
-        self.rightmain_section_frame = Tk.Frame(self, relief="groove", bd=3)
+        self.rightmain_section_frame = VerticalScrolledFrame(self, relief="groove", bd=3)
         self.rightmain_section_frame.pack(side="left", fill="both", expand=1)
 
         #viewtype section
@@ -181,8 +181,8 @@ class Main_mainsection(Tk.Frame):
         #account property section
         self.account_property_section = Main_accountpropertysection(self.main, self.leftmain_section_frame)
 
-        #datareport section
-        self.datareport_section = Main_datareportsection(self.main, self.rightmain_section_frame)
+        # create a frame inside the canvas which will be scrolled with it
+        self.datareport_section = Main_datareportsection(self.main, self.rightmain_section_frame.interior)
 
 #Account section
 class Main_accountsection(Tk.Frame):
@@ -220,7 +220,7 @@ class Main_accountsection(Tk.Frame):
         self.currentaccountselect.set(self.accountlist[self.main.database.get_currentaccountid()-1][1])
 
         self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect) + tuple(accounts))
-        self.accountselectmenu.config(width=30)
+        self.accountselectmenu.config(width=25)
         self.accountselectmenu.pack(padx=10, pady=25, side="left")
 
         #Create button to view the current select account
@@ -366,3 +366,49 @@ class confirmdeteleaccountprompt(Tk.Toplevel):
     def cancelaction(self):
         self.result = False
         self.destroy()
+
+#VerticalScrolledFrame
+class VerticalScrolledFrame(Tk.Frame):
+    """A pure Tkinter scrollable frame that actually works!
+
+    * Use the 'interior' attribute to place widgets inside the scrollable frame
+    * Construct and pack/place/grid normally
+    * This frame only allows vertical scrolling
+    
+    """
+    def __init__(self, parent, *args, **kw):
+        Tk.Frame.__init__(self, parent, *args, **kw)            
+
+        # create a canvas object and a vertical scrollbar for scrolling it
+        vscrollbar = Tk.Scrollbar(self, orient="vertical")
+        vscrollbar.pack(fill="y", side="right", expand=0)
+        canvas = Tk.Canvas(self, bd=0, highlightthickness=0,
+                        yscrollcommand=vscrollbar.set)
+        canvas.pack(side="left", fill="both", expand=1)
+        vscrollbar.config(command=canvas.yview)
+
+        # reset the view
+        canvas.xview_moveto(0)
+        canvas.yview_moveto(0)
+
+        # create a frame inside the canvas which will be scrolled with it
+        self.interior = interior = Tk.Frame(canvas)
+        interior_id = canvas.create_window(0, 0, window=interior,
+                                           anchor="nw")
+
+        # track changes to the canvas and frame width and sync them,
+        # also updating the scrollbar
+        def _configure_interior(event):
+            # update the scrollbars to match the size of the inner frame
+            size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
+            canvas.config(scrollregion="0 0 %s %s" % size)
+            if interior.winfo_reqwidth() != canvas.winfo_width():
+                # update the canvas's width to fit the inner frame
+                canvas.config(width=interior.winfo_reqwidth())
+        interior.bind('<Configure>', _configure_interior)
+
+        def _configure_canvas(event):
+            if interior.winfo_reqwidth() != canvas.winfo_width():
+                # update the inner frame's width to fill the canvas
+                canvas.itemconfigure(interior_id, width=canvas.winfo_width())
+        canvas.bind('<Configure>', _configure_canvas)
