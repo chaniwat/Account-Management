@@ -88,13 +88,16 @@ class Mainwindow:
         print "closethisaccount"
 
     def deletethisaccount(self):
-        result = self.database.deleteaccount(self.database.get_currentaccountid())
-        print result
-        if result:
-            self.refreshdata()
-            self.account_section.pack_forget()
-            self.account_section.destroy()
-            self.account_section = Main_accountsection(self, self.parentaccount_section)
+        """summon the confirm prompt dialog"""
+        actionresult = confirmdeteleaccountprompt(self.root)
+        self.root.wait_window(actionresult)
+        if actionresult.result:
+            sjj0p
+            if result:
+                self.refreshdata()
+                self.account_section.pack_forget()
+                self.account_section.destroy()
+                self.account_section = Main_accountsection(self, self.parentaccount_section)
 
 #By Section Class
 #Main Menu
@@ -286,3 +289,41 @@ class Main_datareportsection:
         self.label1.pack()
 
 #Dedicated window class
+class confirmdeteleaccountprompt(Tk.Toplevel):
+    def __init__(self, parent):
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Pre-defined result for none action
+        self.result = False
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, parent)
+        #Set title
+        self.title("Confirm")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Prevent user to resize this window
+        self.resizable(0, 0)
+        #Focus to self
+        self.focus_set()
+
+        #Create Label
+        Tk.Label(self, text="ต้องการลบบัญชีปัจจุบัน?").pack()
+
+        #Create action button
+        frame_temp = Tk.Frame(self)
+        frame_temp.pack()
+
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction).pack(side="left")
+
+    def confirmaction(self):
+        self.result = True
+        self.destroy()
+
+    def cancelaction(self):
+        self.result = False
+        self.destroy()
