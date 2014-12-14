@@ -93,7 +93,7 @@ class Mainwindow:
         actionresult = confirmdeteleaccountprompt(self.root)
         self.root.wait_window(actionresult)
         if actionresult.result:
-            sjj0p
+            result = self.database.deleteaccount(self.database.get_currentaccountid())
             if result:
                 self.refreshdata()
                 self.account_section.pack_forget()

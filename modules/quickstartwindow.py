@@ -101,9 +101,20 @@ class Quickstartwindow(Tk.Toplevel):
     def selectuser(self, filename):
         """Select user to work with and send filename to root for summon main window
         and destroy this window
+        but if select filename has password will prompt the dialog for user to insert password
         """
-        self.destroy()
-        self.root.summon_mainwindow(filename)      
+        #Get user_info of this user
+        data = db.getuserinfoaccount(filename)[1]
+        #check if filename have password
+        if data["USER_HAS_PWD"] == "True":
+            passprompt = passwordprompt(self, data["USER_PWD"])
+            self.wait_window(passprompt)
+            if passprompt.result:
+                self.destroy()
+                self.root.summon_mainwindow(filename) 
+        else:
+            self.destroy()
+            self.root.summon_mainwindow(filename)              
 
     def deleteuser(self, filename):
         """Delete the select user (delete database file pernamently)"""
@@ -122,3 +133,52 @@ class Quickstartwindow(Tk.Toplevel):
     def summon_addnewuserwindow(self):
         """Summon the add new user window to create new user"""
         self.wait_window(window_Addnewuserwindow(self))
+
+class passwordprompt(Tk.Toplevel):
+    def __init__(self, parent, filepwd):
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Temporary variable to save the vaiue to filepwd
+        self.filepwd = filepwd
+
+        #Pre-defined result for none action
+        self.result = False
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, parent)
+        #Set title
+        self.title("Password")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Prevent user to resize this window
+        self.resizable(0, 0)
+        #Focus to self
+        self.focus_set()
+
+        #Create Label
+        Tk.Label(self, text="กรุณาใส่พาสเวริด").pack()
+
+        #Create Entry
+        self.passwordbox = Tk.Entry(self)
+        self.passwordbox.pack()
+
+        #Create action button
+        frame_temp = Tk.Frame(self)
+        frame_temp.pack()
+
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction).pack(side="left")
+
+    def confirmaction(self):
+        if self.passwordbox.get() == self.filepwd:
+            self.result = True
+            self.destroy()
+        else:
+            print "password not match"
+
+    def cancelaction(self):
+        self.result = False
+        self.destroy()
