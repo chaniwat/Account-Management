@@ -291,22 +291,25 @@ class Main_datareportsection:
         #Temporary variable to save the reference to mainwindow
         self.main = main
 
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
         frametemp = Tk.Frame(self.parent)
         frametemp.pack(fill="x")
-        Tk.Label(frametemp, text="วันที่", width=10, relief="ridge", bg="white").pack(side="left")
-        Tk.Label(frametemp, text="ประเภท", width=25, relief="ridge", bg="white").pack(side="left")
-        Tk.Label(frametemp, text="คำอธิบาย", relief="ridge", bg="white").pack(expand=1, side="left", fill="x")
-        Tk.Label(frametemp, text="ลบรายการ", width=6, relief="ridge", bg="white").pack(side="right")
-        Tk.Label(frametemp, text="จำนวนเงิน", width=13, relief="ridge", bg="white").pack(side="right")
+        Tk.Label(frametemp, text="วันที่", width=10, relief="ridge", bg="white", font=self.customFont).pack(side="left")
+        Tk.Label(frametemp, text="ประเภท", width=25, relief="ridge", bg="white", font=self.customFont).pack(side="left")
+        Tk.Label(frametemp, text="คำอธิบาย", relief="ridge", bg="white", font=self.customFont).pack(expand=1, side="left", fill="x")
+        Tk.Label(frametemp, text="ลบรายการ", width=9, relief="ridge", bg="white", font=self.customFont).pack(side="right")
+        Tk.Label(frametemp, text="จำนวนเงิน", width=13, relief="ridge", bg="white", font=self.customFont).pack(side="right")
 
         for data in self.main.database.get_currentaccountdataall():
             frametemp = Tk.Frame(self.parent)
             frametemp.pack(fill="x")         
-            Tk.Label(frametemp, text=data[0], width=10, relief="ridge", bg="white").pack(side="left", fill="both")
-            Tk.Label(frametemp, text=data[1], width=25, relief="ridge", bg="white").pack(side="left", fill="both")
-            Tk.Label(frametemp, wraplength=350, justify="left", text=data[2], relief="ridge", bg="white").pack(expand=1, side="left", fill="both")
-            Tk.Button(frametemp, width=5, text="ลบ", command=lambda change_id=data[4]: self.printa(change_id)).pack(side="right", ipadx=1)
-            Tk.Label(frametemp, width=13, text=data[3], relief="ridge", bg="white").pack(side="right", fill="both")
+            Tk.Label(frametemp, text=data[0], width=10, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
+            Tk.Label(frametemp, text=data[1], width=25, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
+            Tk.Label(frametemp, wraplength=350, justify="left", text=data[2], relief="ridge", bg="white", font=self.customFont).pack(expand=1, side="left", fill="both")
+            Tk.Button(frametemp, width=8, text="ลบ", command=lambda change_id=data[4]: self.printa(change_id), font=self.customFont).pack(side="right", ipadx=1)
+            Tk.Label(frametemp, width=13, text=data[3], relief="ridge", bg="white", font=self.customFont).pack(side="right", fill="both")
 
     def printa(self, text):
         print text
