@@ -49,7 +49,8 @@ class database:
         """
         #account_info table
         self.cursor.execute("INSERT INTO account_info VALUES(NULL, '"+data["name"]+"', '"+data["type"]+"', 'CON', '"+time.strftime("%d-%m-%Y")+"', "+data["initmoney"]+")")
-        self.connectresult.commit()
+        self.cursor.execute("INSERT INTO change_info VALUES(NULL, "+str(self.cursor.lastrowid)+", 'CHANGE_INITIATE', '"+time.strftime("%d-%m-%Y")+"', 'ACCOUNT_INITIATE_TEXT', "+data["initmoney"]+")")
+        self.connectresult.commit()       
 
         return True
 
@@ -84,6 +85,12 @@ class database:
         self.cursor.execute("SELECT account_type FROM account_info WHERE account_id = "+str(self.currentaccountid))
         result = self.cursor.fetchone()[0]
         return result
+
+    def get_currentaccountdataall(self):
+        """return the change_info of account_id"""
+        self.cursor.execute("SELECT change_data, change_type, change_description, change_amount, change_id FROM change_info WHERE account_id = "+str(self.currentaccountid)+" ORDER BY change_id DESC")
+
+        return self.cursor.fetchall()
 
 #Normal Function -> use mostly in quick start window
 def createnewaccount(data):
@@ -177,7 +184,7 @@ def deleteaccount(filename):
 
 def getuserinfoaccount(filename):
     """return a dict of account info (user_info table)
-    
+
     Result:
         get user success: True, result
 

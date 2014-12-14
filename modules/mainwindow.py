@@ -172,7 +172,7 @@ class Main_mainsection(Tk.Frame):
         self.leftmain_section_frame.pack(side="left", fill="y")
 
         #rightmain section
-        self.rightmain_section_frame = Tk.Frame(self, bg="red")
+        self.rightmain_section_frame = Tk.Frame(self, relief="groove", bd=3)
         self.rightmain_section_frame.pack(side="left", fill="both", expand=1)
 
         #viewtype section
@@ -182,7 +182,7 @@ class Main_mainsection(Tk.Frame):
         self.account_property_section = Main_accountpropertysection(self.main, self.leftmain_section_frame)
 
         #datareport section
-        self.datareport_section = Main_datareportsection(self.main, self.rightmain_section_frame, accountdata)
+        self.datareport_section = Main_datareportsection(self.main, self.rightmain_section_frame)
 
 #Account section
 class Main_accountsection(Tk.Frame):
@@ -284,16 +284,32 @@ class Main_viewtypesection(Tk.Frame):
 
 #Data report table section + support class
 class Main_datareportsection:
-    def __init__(self, main, parent, accountdata):
+    def __init__(self, main, parent):
         #Temporary variable to save the reference to parent
         self.parent = parent
 
         #Temporary variable to save the reference to mainwindow
         self.main = main
 
-        #Create label
-        self.label1 = Tk.Label(self.parent, text=accountdata)
-        self.label1.pack()
+        frametemp = Tk.Frame(self.parent)
+        frametemp.pack(fill="x")
+        Tk.Label(frametemp, text="วันที่", width=10, relief="ridge", bg="white").pack(side="left")
+        Tk.Label(frametemp, text="ประเภท", width=25, relief="ridge", bg="white").pack(side="left")
+        Tk.Label(frametemp, text="คำอธิบาย", relief="ridge", bg="white").pack(expand=1, side="left", fill="x")
+        Tk.Label(frametemp, text="ลบรายการ", width=6, relief="ridge", bg="white").pack(side="right")
+        Tk.Label(frametemp, text="จำนวนเงิน", width=13, relief="ridge", bg="white").pack(side="right")
+
+        for data in self.main.database.get_currentaccountdataall():
+            frametemp = Tk.Frame(self.parent)
+            frametemp.pack(fill="x")         
+            Tk.Label(frametemp, text=data[0], width=10, relief="ridge", bg="white").pack(side="left", fill="both")
+            Tk.Label(frametemp, text=data[1], width=25, relief="ridge", bg="white").pack(side="left", fill="both")
+            Tk.Label(frametemp, wraplength=350, justify="left", text=data[2], relief="ridge", bg="white").pack(expand=1, side="left", fill="both")
+            Tk.Button(frametemp, width=5, text="ลบ", command=lambda change_id=data[4]: self.printa(change_id)).pack(side="right", ipadx=1)
+            Tk.Label(frametemp, width=13, text=data[3], relief="ridge", bg="white").pack(side="right", fill="both")
+
+    def printa(self, text):
+        print text
 
 #Dedicated window class
 class confirmdeteleaccountprompt(Tk.Toplevel):
