@@ -176,10 +176,10 @@ def deleteaccount(filename):
     return (True, "DB_SUCCESS_DELETE")
 
 def getuserinfoaccount(filename):
+    """return a dict of account info (user_info table)
+    
     Result:
         get user success: True, result
-
-    """return a dict of account info (user_info table)
 
     return result dict keywords:
         USER_NAME,
