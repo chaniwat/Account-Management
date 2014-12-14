@@ -8,6 +8,7 @@
 """
 
 import Tkinter as Tk
+import tkFont
 import database as db
 import sys, os, md5, time
 from addaccountwindow import Addnewaccountwindow as window_Addnewaccountwindow
@@ -112,26 +113,28 @@ class Main_menubar(Tk.Menu):
         #Create an menu
         Tk.Menu.__init__(self, self.parent)
 
+        self.customFont = tkFont.Font(family="Browallia New", size=13)
+
         #Add menu and submenu
         #Program menu
         self.programmenu = Tk.Menu(self, tearoff=0)
-        self.programmenu.add_command(label="เปลี่ยนผู้ใช้", command=lambda: self.swapuser())
+        self.programmenu.add_command(label="เปลี่ยนผู้ใช้", command=lambda: self.swapuser(), font=self.customFont)
         self.programmenu.add_separator()
-        self.programmenu.add_command(label="ออกจากโปรแกรม", command=lambda: self.exitprogram())
-        self.add_cascade(label="โปรแกรม", menu=self.programmenu)
+        self.programmenu.add_command(label="ออกจากโปรแกรม", command=lambda: self.exitprogram(), font=self.customFont)
+        self.add_cascade(label="โปรแกรม", menu=self.programmenu, font=self.customFont)
 
         #user menu
         self.usermenu = Tk.Menu(self, tearoff=0)
-        self.usermenu.add_command(label="สรุปเงินทั้งหมด", command=lambda: hello())
-        self.usermenu.add_command(label="ประมาณเงินคงเหลือ", command=lambda: hello())
-        self.add_cascade(label="ผู้ใช้", menu=self.usermenu)
+        self.usermenu.add_command(label="สรุปเงินทั้งหมด", command=lambda: hello(), font=self.customFont)
+        self.usermenu.add_command(label="ประมาณเงินคงเหลือ", command=lambda: hello(), font=self.customFont)
+        self.add_cascade(label="ผู้ใช้", menu=self.usermenu, font=self.customFont)
 
         #account menu
         self.accountmenu = Tk.Menu(self, tearoff=0)
-        self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: self.main.newaccount())
-        self.accountmenu.add_command(label="ปิดบัญชี" ,command=lambda: hello())
-        self.accountmenu.add_command(label="ลบบัญชี" ,command=lambda: hello())
-        self.add_cascade(label="บัญชี", menu=self.accountmenu)
+        self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: self.main.newaccount(), font=self.customFont)
+        self.accountmenu.add_command(label="ปิดบัญชี" ,command=lambda: hello(), font=self.customFont)
+        self.accountmenu.add_command(label="ลบบัญชี" ,command=lambda: hello(), font=self.customFont)
+        self.add_cascade(label="บัญชี", menu=self.accountmenu, font=self.customFont)
 
         #Set parent to use this menubar
         self.parent.config(menu=self)
@@ -190,6 +193,8 @@ class Main_accountsection(Tk.Frame):
         #Temporary variable to save the reference to mainwindow
         self.main = main
 
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
         #list the account of this user
         self.accountlist = self.main.database.listaccount()
         if self.accountlist[0]:
@@ -203,7 +208,7 @@ class Main_accountsection(Tk.Frame):
         self.pack(fill="x")
 
         #Create Label for account selection
-        Tk.Label(self, text="เลือกบัญชี").pack(side="left", pady=25)
+        Tk.Label(self, text="เลือกบัญชี", font=self.customFont).pack(side="left", pady=25)
 
         #Create selection for current account to show
         accounts = list()
@@ -219,26 +224,28 @@ class Main_accountsection(Tk.Frame):
         self.accountselectmenu.pack(padx=10, pady=25, side="left")
 
         #Create button to view the current select account
-        Tk.Button(self, text="ดูบัญชี", command=self.changedatareport).pack(padx=5, pady=25, side="left")
+        Tk.Button(self, text="ดูบัญชี", command=self.changedatareport, font=self.customFont).pack(padx=5, pady=25, side="left")
 
         #Create frame to make a separator
         Tk.Frame(self, width=2, bd=1, relief="sunken").pack(side="left", fill="y", padx=10, pady=10)
 
         #Create Label for showing current account
-        self.accountnamelabel = Tk.Label(self, text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname())
+        self.accountnamelabel = Tk.Label(self, text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname(), font=self.customFont)
         self.accountnamelabel.pack(side="left", pady=25)
 
         #Create button to edit the current select account
-        Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount).pack(padx=5, side="left")
+        Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount, font=self.customFont).pack(padx=5, side="left")
 
         #Create button to close the current select account
-        Tk.Button(self, text="ปิดบัญชีปัจจุบัน", command=self.main.closethisaccount).pack(padx=5, side="left")
+        Tk.Button(self, text="ปิดบัญชีปัจจุบัน", command=self.main.closethisaccount, font=self.customFont).pack(padx=5, side="left")
 
         #Create button to delete the current select account
-        Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.main.deletethisaccount).pack(padx=5, side="left")
+        Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.main.deletethisaccount, font=self.customFont).pack(padx=5, side="left")
 
     def changedatareport(self):
         """Change data to report to select account"""
+        self.customFont = tkFont.Font(family="Browallia New", size=20)
+
         #Find account id
         for account in self.accountlist:
             if self.currentaccountselect.get() == account[1]:
@@ -246,7 +253,7 @@ class Main_accountsection(Tk.Frame):
                 break
         #Set and refrest data report frame
         self.main.database.set_currentaccountid(currentaccountselect_id)
-        self.accountnamelabel.config(text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname())
+        self.accountnamelabel.config(text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname(), font=self.customFont)
         self.main.refreshdata()
 
 #Account property section
