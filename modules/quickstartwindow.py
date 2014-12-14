@@ -41,6 +41,15 @@ class Quickstartwindow(Tk.Toplevel):
         #Create Button for adding new user
         Tk.Button(self, text="เพิ่มผู้ใช้ใหม่", bd=4, width=30, height=1, command=self.summon_addnewuserwindow, font=self.customFont).pack(side="bottom", fill="x")
 
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = (self.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.winfo_screenheight() // 2) - (h // 2)
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
 
@@ -101,17 +110,31 @@ class Quickstartwindow(Tk.Toplevel):
     def selectuser(self, filename):
         """Select user to work with and send filename to root for summon main window
         and destroy this window
+        but if select filename has password will prompt the dialog for user to insert password
         """
-        self.destroy()
-        self.root.summon_mainwindow(filename)      
+        #Get user_info of this user
+        data = db.getuserinfoaccount(filename)[1]
+        #check if filename have password
+        if data["USER_HAS_PWD"] == "True":
+            passprompt = passwordprompt(self, data["USER_PWD"])
+            self.wait_window(passprompt)
+            if passprompt.result:
+                self.destroy()
+                self.root.summon_mainwindow(filename) 
+        else:
+            self.destroy()
+            self.root.summon_mainwindow(filename)              
 
     def deleteuser(self, filename):
-        """Delete the select user (delete database file pernamently)"""
-        result = db.deleteaccount(filename)
-        if result[0]:
-            self.refreshthiswindow()
-        else:
-            print result[1]
+        """prompt the confirm window and Delete the select user if user confirm (delete database file pernamently)"""
+        prompt = confirmdeteleuserprompt(self)
+        self.wait_window(prompt)
+        if prompt.result:
+            result = db.deleteaccount(filename)
+            if result[0]:
+                self.refreshthiswindow()
+            else:
+                print result[1]
 
     def refreshthiswindow(self):
         """Refresh this window by close and re-summon"""
@@ -122,3 +145,117 @@ class Quickstartwindow(Tk.Toplevel):
     def summon_addnewuserwindow(self):
         """Summon the add new user window to create new user"""
         self.wait_window(window_Addnewuserwindow(self))
+
+class passwordprompt(Tk.Toplevel):
+    def __init__(self, parent, filepwd):
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Temporary variable to save the vaiue to filepwd
+        self.filepwd = filepwd
+
+        #Pre-defined result for none action
+        self.result = False
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, parent)
+        #Set title
+        self.title("Password")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Window size
+        self.minsize(200,100)
+        #Focus to self
+        self.focus_set()
+
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+        #Create Label
+        Tk.Label(self, text="กรุณาใส่พาสเวริด", font=self.customFont).pack()
+
+        #Create Entry
+        self.passwordbox = Tk.Entry(self)
+        self.passwordbox.pack()
+
+        #Create action button
+        frame_temp = Tk.Frame(self)
+        frame_temp.pack()
+
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
+        
+        #Centered window
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = (self.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.winfo_screenheight() // 2) - (h // 2)
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
+    def confirmaction(self):
+        if self.passwordbox.get() == self.filepwd:
+            self.result = True
+            self.destroy()
+        else:
+            print "password not match"
+
+    def cancelaction(self):
+        self.result = False
+        self.destroy()
+
+class confirmdeteleuserprompt(Tk.Toplevel):
+    def __init__(self, parent):
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Pre-defined result for none action
+        self.result = False
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, parent)
+        #Set title
+        self.title("Confirm")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Window size
+        self.minsize(200,90)
+        #Focus to self
+        self.focus_set()
+
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
+        #Create Label
+        Tk.Label(self, text="ต้องการลบผู้ใช้นี้?", font=self.customFont).pack()
+
+        #Create action button
+        frame_temp = Tk.Frame(self)
+        frame_temp.pack()
+
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
+
+        #Centered window
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = (self.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.winfo_screenheight() // 2) - (h // 2)
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
+
+    def confirmaction(self):
+        self.result = True
+        self.destroy()
+
+    def cancelaction(self):
+        self.result = False
+        self.destroy()

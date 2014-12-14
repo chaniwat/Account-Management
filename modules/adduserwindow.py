@@ -73,6 +73,15 @@ class Addnewuserwindow(Tk.Toplevel):
         #Create Button to submit the from
         Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=self.createnewuser, font=self.customFont).pack(fill="x")
 
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
     def createnewuser(self):
         #Get all data in textbox (entry widget) into dict
         data = dict()
