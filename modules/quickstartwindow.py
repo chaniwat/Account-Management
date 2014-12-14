@@ -41,6 +41,15 @@ class Quickstartwindow(Tk.Toplevel):
         #Create Button for adding new user
         Tk.Button(self, text="เพิ่มผู้ใช้ใหม่", bd=4, width=30, height=1, command=self.summon_addnewuserwindow, font=self.customFont).pack(side="bottom", fill="x")
 
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = (self.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.winfo_screenheight() // 2) - (h // 2)
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
 
