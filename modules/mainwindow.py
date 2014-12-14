@@ -312,20 +312,33 @@ class confirmdeteleaccountprompt(Tk.Toplevel):
         #Overlay and freeze the parent
         self.transient(self.parent)
         self.grab_set()
-        #Prevent user to resize this window
-        self.resizable(0, 0)
+        #Window size
+        self.minsize(200,100)
         #Focus to self
         self.focus_set()
 
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
         #Create Label
-        Tk.Label(self, text="ต้องการลบบัญชีปัจจุบัน?").pack()
+        Tk.Label(self, text="ต้องการลบบัญชีปัจจุบัน?", font=self.customFont).pack()
 
         #Create action button
         frame_temp = Tk.Frame(self)
         frame_temp.pack()
 
-        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction).pack(side="left")
-        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction).pack(side="left")
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
+
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height(),
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
 
     def confirmaction(self):
         self.result = True
