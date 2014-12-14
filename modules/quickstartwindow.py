@@ -170,8 +170,11 @@ class passwordprompt(Tk.Toplevel):
         #Focus to self
         self.focus_set()
 
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=20)
+
         #Create Label
-        Tk.Label(self, text="กรุณาใส่พาสเวริด").pack()
+        Tk.Label(self, text="กรุณาใส่พาสเวริด", font=self.customFont).pack()
 
         #Create Entry
         self.passwordbox = Tk.Entry(self)
@@ -181,8 +184,18 @@ class passwordprompt(Tk.Toplevel):
         frame_temp = Tk.Frame(self)
         frame_temp.pack()
 
-        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction).pack(side="left")
-        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction).pack(side="left")
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
+        
+        #Centered window
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = (self.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.winfo_screenheight() // 2) - (h // 2)
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
     def confirmaction(self):
         if self.passwordbox.get() == self.filepwd:
