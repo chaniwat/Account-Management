@@ -117,12 +117,15 @@ class Quickstartwindow(Tk.Toplevel):
             self.root.summon_mainwindow(filename)              
 
     def deleteuser(self, filename):
-        """Delete the select user (delete database file pernamently)"""
-        result = db.deleteaccount(filename)
-        if result[0]:
-            self.refreshthiswindow()
-        else:
-            print result[1]
+        """prompt the confirm window and Delete the select user if user confirm (delete database file pernamently)"""
+        prompt = confirmdeteleuserprompt(self)
+        self.wait_window(prompt)
+        if prompt.result:
+            result = db.deleteaccount(filename)
+            if result[0]:
+                self.refreshthiswindow()
+            else:
+                print result[1]
 
     def refreshthiswindow(self):
         """Refresh this window by close and re-summon"""
@@ -178,6 +181,45 @@ class passwordprompt(Tk.Toplevel):
             self.destroy()
         else:
             print "password not match"
+
+    def cancelaction(self):
+        self.result = False
+        self.destroy()
+
+class confirmdeteleuserprompt(Tk.Toplevel):
+    def __init__(self, parent):
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Pre-defined result for none action
+        self.result = False
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, parent)
+        #Set title
+        self.title("Confirm")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Prevent user to resize this window
+        self.resizable(0, 0)
+        #Focus to self
+        self.focus_set()
+
+        #Create Label
+        Tk.Label(self, text="ต้องการลบผู้ใช้นี้?").pack()
+
+        #Create action button
+        frame_temp = Tk.Frame(self)
+        frame_temp.pack()
+
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction).pack(side="left")
+
+    def confirmaction(self):
+        self.result = True
+        self.destroy()
 
     def cancelaction(self):
         self.result = False
