@@ -4,7 +4,7 @@
 """
     Core Modules of the program
     Account-Management
-    Created by: Meranote
+    Created by: Meranote, Jirat
 """
 
 import Tkinter as Tk
@@ -375,6 +375,7 @@ class VerticalScrolledFrame(Tk.Frame):
     * Construct and pack/place/grid normally
     * This frame only allows vertical scrolling
     
+    credit: http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
     """
     def __init__(self, parent, *args, **kw):
         Tk.Frame.__init__(self, parent, *args, **kw)            
