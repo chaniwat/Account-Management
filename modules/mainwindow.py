@@ -210,21 +210,18 @@ class Main_accountsection(Tk.Frame):
         #Create Label for account selection
         Tk.Label(self, text="เลือกบัญชี", font=self.customFont).pack(side="left", pady=25)
 
-        #Create selection for current account to show
-        accounts = list()
-        #Unload variable
-        for account in self.accountlist:
-            accounts.append(account[1])
         #Create selection menu
         self.currentaccountselect = Tk.StringVar(self)
-        self.currentaccountselect.set(self.accountlist[self.main.database.get_currentaccountid()-1][1])
+        self.currentaccountselect.set(self.main.database.get_currentaccountname())
 
-        self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect) + tuple(accounts))
+        self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect, ''))
         self.accountselectmenu.config(width=25)
         self.accountselectmenu.pack(padx=10, pady=25, side="left")
+        self.accountselectmenuelement = self.accountselectmenu.children["menu"]
+        self.accountselectmenuelement.delete(0, 'end')
 
-        #Create button to view the current select account
-        Tk.Button(self, text="ดูบัญชี", command=self.changedatareport, font=self.customFont).pack(padx=5, pady=25, side="left")
+        for account in self.accountlist:
+            self.accountselectmenuelement.add_command(label=account[1], command=lambda account_id=account[0]: self.changedatareport(account_id))
 
         #Create frame to make a separator
         Tk.Frame(self, width=2, bd=1, relief="sunken").pack(side="left", fill="y", padx=10, pady=10)
@@ -242,18 +239,14 @@ class Main_accountsection(Tk.Frame):
         #Create button to delete the current select account
         Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.main.deletethisaccount, font=self.customFont).pack(padx=5, side="left")
 
-    def changedatareport(self):
+    def changedatareport(self, account_id):
         """Change data to report to select account"""
         self.customFont = tkFont.Font(family="Browallia New", size=20)
 
-        #Find account id
-        for account in self.accountlist:
-            if self.currentaccountselect.get() == account[1]:
-                currentaccountselect_id = account[0]
-                break
         #Set and refrest data report frame
-        self.main.database.set_currentaccountid(currentaccountselect_id)
+        self.main.database.set_currentaccountid(account_id)
         self.accountnamelabel.config(text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname(), font=self.customFont)
+        self.currentaccountselect.set(self.main.database.get_currentaccountname())
         self.main.refreshdata()
 
 #Account property section
@@ -413,3 +406,11 @@ class VerticalScrolledFrame(Tk.Frame):
                 # update the inner frame's width to fill the canvas
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         canvas.bind('<Configure>', _configure_canvas)
+
+        def _on_mousewheel(event):
+            canvas.yview_scroll(-1*(event.delta/120), "units")
+
+        #Bind mousewheel to scroll
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+   
