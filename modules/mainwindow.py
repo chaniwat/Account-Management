@@ -12,6 +12,7 @@ import tkFont
 import database as db
 import sys, os, md5, time
 from addaccountwindow import Addnewaccountwindow as window_Addnewaccountwindow
+from addrecordwindow import Addnewrecordwindow as window_Addnewrecordwindow
 
 #Global Variable use cross the program
 #Full directory path that keep core file
@@ -84,6 +85,14 @@ class Mainwindow:
             self.account_section.pack_forget()
             self.account_section.destroy()
             self.account_section = Main_accountsection(self, self.parentaccount_section)
+            self.refreshdata()
+
+    def newrecord(self):
+        """summon the add new record window"""
+        newrecordwindow = window_Addnewrecordwindow(self, self.root, self.database.get_currentaccounttype())
+        self.root.wait_window(newrecordwindow)
+        if newrecordwindow.result:
+            self.refreshdata()
 
     def closethisaccount(self):
         print "closethisaccount"
@@ -171,9 +180,15 @@ class Main_mainsection(Tk.Frame):
         self.leftmain_section_frame = Tk.Frame(self)
         self.leftmain_section_frame.pack(side="left", fill="y")
 
+        self.rightsection = Tk.Frame(self)
+        self.rightsection.pack(side="left", fill="both", expand=1)
+
+        #Create Button for adding new record
+        Tk.Button(self.rightsection, text="เพิ่มรายการ", height=3, command=self.main.newrecord).pack(side="top", fill="x")
+
         #rightmain section
-        self.rightmain_section_frame = VerticalScrolledFrame(self, relief="groove", bd=3)
-        self.rightmain_section_frame.pack(side="left", fill="both", expand=1)
+        self.rightmain_section_frame = VerticalScrolledFrame(self.rightsection, relief="groove", bd=3)
+        self.rightmain_section_frame.pack(side="bottom", fill="both", expand=1)
 
         #viewtype section
         self.viewtype_section = Main_viewtypesection(self.main, self.leftmain_section_frame)
@@ -223,15 +238,15 @@ class Main_accountsection(Tk.Frame):
         for account in self.accountlist:
             self.accountselectmenuelement.add_command(label=account[1], command=lambda account_id=account[0]: self.changedatareport(account_id))
 
+        #Create button to edit the current select account
+        Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount, font=self.customFont).pack(padx=5, side="left")
+
         #Create frame to make a separator
         Tk.Frame(self, width=2, bd=1, relief="sunken").pack(side="left", fill="y", padx=10, pady=10)
 
         #Create Label for showing current account
         self.accountnamelabel = Tk.Label(self, text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname(), font=self.customFont)
         self.accountnamelabel.pack(side="left", pady=25)
-
-        #Create button to edit the current select account
-        Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount, font=self.customFont).pack(padx=5, side="left")
 
         #Create button to close the current select account
         Tk.Button(self, text="ปิดบัญชีปัจจุบัน", command=self.main.closethisaccount, font=self.customFont).pack(padx=5, side="left")

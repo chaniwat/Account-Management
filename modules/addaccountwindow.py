@@ -71,7 +71,6 @@ class Addnewaccountwindow(Tk.Toplevel):
         y = ((self.winfo_screenheight() // 2) - (h // 2))
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
-
     def createnewaccount(self):
         #Collect data
         data = dict()
@@ -82,7 +81,8 @@ class Addnewaccountwindow(Tk.Toplevel):
             data["type"] = "ACC_POT"
         data["initmoney"] = self.moneybox.get()
 
-        self.result = self.main.database.addaccount(data)
+        self.result, self.newid = self.main.database.addaccount(data)
 
         if self.result:
+            self.main.database.set_currentaccountid(self.newid)
             self.destroy()

@@ -49,10 +49,11 @@ class database:
         """
         #account_info table
         self.cursor.execute("INSERT INTO account_info VALUES(NULL, '"+data["name"]+"', '"+data["type"]+"', 'CON', '"+time.strftime("%d-%m-%Y")+"', "+data["initmoney"]+")")
+        account_id = self.cursor.lastrowid
         self.cursor.execute("INSERT INTO change_info VALUES(NULL, "+str(self.cursor.lastrowid)+", 'CHANGE_INITIATE', '"+time.strftime("%d-%m-%Y")+"', 'ACCOUNT_INITIATE_TEXT', "+data["initmoney"]+")")
         self.connectresult.commit()       
 
-        return True
+        return True, account_id
 
     def deleteaccount(self, account_id):
         """Delete account by id"""
@@ -65,6 +66,19 @@ class database:
             self.connectresult.commit()
             self.set_currentaccountid()
             return True
+
+    def addrecordtocurrentaccount(self, data):
+        """add an record of current account
+
+        data dict keywords:
+        type, (type of change)
+        description, (description of change)
+        amtmoney, (amount of money)
+        """
+        self.cursor.execute("INSERT INTO change_info VALUES(NULL, "+str(self.get_currentaccountid())+", '"+data["type"]+"', '"+time.strftime("%d-%m-%Y")+"', '"+data["description"]+"', "+data["amtmoney"]+")")
+        self.connectresult.commit()
+
+        return True
 
     def set_currentaccountid(self, account_id=1):
         """Set the current account to show to user"""
@@ -88,7 +102,7 @@ class database:
 
     def get_currentaccountdataall(self):
         """return the change_info of account_id"""
-        self.cursor.execute("SELECT change_data, change_type, change_description, change_amount, change_id FROM change_info WHERE account_id = "+str(self.currentaccountid)+" ORDER BY change_id DESC")
+        self.cursor.execute("SELECT change_date, change_type, change_description, change_amount, change_id FROM change_info WHERE account_id = "+str(self.currentaccountid)+" ORDER BY change_id DESC")
 
         return self.cursor.fetchall()
 
@@ -154,7 +168,7 @@ def createnewaccount(data):
         db_cursor.execute("CREATE TABLE account_info(account_id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, account_type TEXT, account_status TEXT, account_lastupdate TEXT, account_currentmoney INTEGER)")
         db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"]+"', "+data["initmoney"]+")")
         #change_info table
-        db_cursor.execute("CREATE TABLE change_info(change_id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, change_type TEXT, change_data TEXT, change_description TEXT, change_amount INTEGER)")
+        db_cursor.execute("CREATE TABLE change_info(change_id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, change_type TEXT, change_date TEXT, change_description TEXT, change_amount INTEGER)")
         db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"]+"', 'ACCOUNT_INITIATE_TEXT', "+data["initmoney"]+")")
 
     #return success
