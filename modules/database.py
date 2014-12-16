@@ -6,6 +6,8 @@ import os, md5, time
 from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, \
                        DATABASE_DIRECTORY_PATH
 
+DATABASE_CHANGE_TYPE_PLUS = ["CHANGE_WALLET_INCOME", "CHANGE_BANK_DEPOSIT", "CHANGE_POT_DEPOSIT", "CHANGE_BANK_TRANSFER_IN"]
+
 class database:
     def __init__(self):
         #Set attribute
@@ -28,6 +30,7 @@ class database:
         if not self.connectresult:
             return (False, "DB_ERR_NOT_CONNECT")
         else:
+            self.connectresult.close()
             return (True, "DB_SUCCESS_CLOSECONNECT")
 
     def listaccount(self):
@@ -75,6 +78,20 @@ class database:
         description, (description of change)
         amtmoney, (amount of money)
         """
+        if data["type"] in DATABASE_CHANGE_TYPE_PLUS:
+            self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
+            newmoney = self.cursor.fetchone()[0]+int(data["amtmoney"])
+            self.cursor.execute("UPDATE account_info SET account_currentmoney="+str(newmoney)+" WHERE account_id="+str(self.get_currentaccountid()))
+            self.connectresult.commit()
+        else:
+            self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
+            newmoney = self.cursor.fetchone()[0]-int(data["amtmoney"])
+            if newmoney < 0:
+                print "money of this account not have enough money, add some money first"
+                return False
+            self.cursor.execute("UPDATE account_info SET account_currentmoney="+str(newmoney)+" WHERE account_id="+str(self.get_currentaccountid()))
+            self.connectresult.commit()
+
         self.cursor.execute("INSERT INTO change_info VALUES(NULL, "+str(self.get_currentaccountid())+", '"+data["type"]+"', '"+time.strftime("%d-%m-%Y")+"', '"+data["description"]+"', "+data["amtmoney"]+")")
         self.connectresult.commit()
 
@@ -82,6 +99,31 @@ class database:
 
     def deleterecord(self, record_id):
         """delete the select record"""
+        self.cursor.execute("SELECT change_type FROM change_info WHERE change_id="+str(record_id))
+        record_type = self.cursor.fetchone()[0]
+        if record_type == "CHANGE_INITIATE":
+            print "cannont delete initiate change"
+            return False
+        elif record_type in DATABASE_CHANGE_TYPE_PLUS:
+            self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
+            currentmoney = self.cursor.fetchone()[0]
+            self.cursor.execute("SELECT change_amount FROM change_info WHERE change_id="+str(record_id))
+            recordmoney = self.cursor.fetchone()[0]
+            newmoney = currentmoney - recordmoney
+            if newmoney < 0:
+                print "money of this account not have enough money, add some money first"
+                return False
+            self.cursor.execute("UPDATE account_info SET account_currentmoney="+str(newmoney)+" WHERE account_id="+str(self.get_currentaccountid()))
+            self.connectresult.commit()
+        else:
+            self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
+            currentmoney = self.cursor.fetchone()[0]
+            self.cursor.execute("SELECT change_amount FROM change_info WHERE change_id="+str(record_id))
+            recordmoney = self.cursor.fetchone()[0]
+            newmoney = currentmoney + recordmoney
+            self.cursor.execute("UPDATE account_info SET account_currentmoney="+str(newmoney)+" WHERE account_id="+str(self.get_currentaccountid()))
+            self.connectresult.commit()
+
         self.cursor.execute("DELETE FROM change_info WHERE change_id="+str(record_id))
         self.connectresult.commit()
 
@@ -112,6 +154,35 @@ class database:
         self.cursor.execute("SELECT change_date, change_type, change_description, change_amount, change_id FROM change_info WHERE account_id = "+str(self.currentaccountid)+" ORDER BY change_id DESC")
 
         return self.cursor.fetchall()
+
+    def get_currentuserinfo(self):
+        """return the value of current user_info
+
+        Result:
+            get user success: True, result
+
+        return result dict keywords:
+            USER_NAME,
+            USER_SURNAME,
+            USER_NICKNAME,
+            USER_BIRTHDAY,
+            USER_HAS_PWD,
+            USER_PWD,
+            USER_CREATEDATE,
+            USER_LASTEDITDATE
+        """
+        #Execute sql script to get the account info (user_info table) of this account and make it as a dict
+        self.cursor.execute("SELECT * from user_info")
+        result = dict(self.cursor.fetchall())
+
+        #Return result
+        return True, result
+
+    def get_currentaccountinfo(self):
+        """return the info of current account_id"""
+        self.cursor.execute("SELECT account_name, account_type, account_lastupdate, account_currentmoney FROM account_info WHERE account_id = "+str(self.currentaccountid))
+
+        return self.cursor.fetchone()
 
 #Normal Function -> use mostly in quick start window
 def createnewaccount(data):

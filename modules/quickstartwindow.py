@@ -53,9 +53,6 @@ class Quickstartwindow(Tk.Toplevel):
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
 
-    def __repr__(self):
-        return "quickstartwindow"
-
     def listcreateduser(self, parent):
         """List the user that created in database directory and add user 
         widget that make for user to select to work with or delete 
@@ -144,7 +141,10 @@ class Quickstartwindow(Tk.Toplevel):
 
     def summon_addnewuserwindow(self):
         """Summon the add new user window to create new user"""
-        self.wait_window(window_Addnewuserwindow(self))
+        adduserwindow = window_Addnewuserwindow(self)
+        self.wait_window(adduserwindow)
+        if adduserwindow.result[0]:
+            self.selectuser(adduserwindow.result[1])
 
 class passwordprompt(Tk.Toplevel):
     def __init__(self, parent, filepwd):

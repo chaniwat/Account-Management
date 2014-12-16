@@ -37,13 +37,13 @@ class Addnewrecordwindow(Tk.Toplevel):
         self.input_form.pack()
 
         #Create label and selection menu for change type by current account type
-        Tk.Label(self.input_form, text="ประเภทรายการ", font=self.customFont).pack()
+        Tk.Label(self.input_form, text="ประเภทรายการ", font=customFont).pack()
         if accounttype == "ACC_WALLET":
             self.recordtypelist = []
             self.recordtypelist_name = ("CHANGE_WALLET_INCOME", "CHANGE_WALLET_EAT", "CHANGE_WALLET_BUY", "CHANGE_WALLET_ENTERTAINMENT", "CHANGE_WALLET_TRAVEL", "CHANGE_WALLET_BILL")
         elif accounttype == "ACC_BANK":
             self.recordtypelist = []
-            self.recordtypelist_name = ("CHANGE_BANK_DEPOSIT", "CHANGE_BANK_WITHDRAW", "CHANGE_BANK_TRANSFER", "CHANGE_BANK_PAY")
+            self.recordtypelist_name = ("CHANGE_BANK_DEPOSIT", "CHANGE_BANK_WITHDRAW", "CHANGE_BANK_TRANSFER_IN", "CHANGE_BANK_TRANSFER_OUT", "CHANGE_BANK_PAY")
         elif accounttype == "ACC_POT":
             self.recordtypelist = []
             self.recordtypelist_name = ("CHANGE_POT_DEPOSIT", "CHANGE_POT_WITHDRAW")
@@ -84,8 +84,6 @@ class Addnewrecordwindow(Tk.Toplevel):
         data["type"] = self.currenttypeselect.get()
         data["description"] = self.description.get()
         data["amtmoney"] = self.money.get()
-
-        print data
 
         self.result = self.main.database.addrecordtocurrentaccount(data)
 

@@ -18,6 +18,9 @@ class Addnewuserwindow(Tk.Toplevel):
 
         self.customFont = tkFont.Font(family="Browallia New", size=20)
 
+        #keep result for none action
+        self.result = False, None
+
         #Overlay and freeze the parent
         self.transient(self.parent)
         self.grab_set()
@@ -116,14 +119,12 @@ class Addnewuserwindow(Tk.Toplevel):
         #Sent and receive the result to database to create new user
         result = db.createnewaccount(data)
         if result[0]:
-            #if parent is quick start window, simply add new user widget to quick start window
-            if repr(self.parent) == "quickstartwindow":
-                #Refresh the quick start window
-                self.parent.refreshthiswindow()
             #Close this window
             self.destroy()
+            self.result = True, result[2]
         else:
             print result[1]
+            self.result = False, None
 
     def togglepasswordtextbox(self):
         """Check if has_pwd is true or not, toggle the disable state of pwd entry"""
