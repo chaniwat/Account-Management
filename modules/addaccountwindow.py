@@ -22,7 +22,7 @@ class Addnewaccountwindow(Tk.Toplevel):
         #Set title
         self.title("Create new account")
 
-        self.customFont = tkFont.Font(family="Browallia New", size=20)
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
 
         #Overlay and freeze the parent
         self.transient(self.parent)
@@ -48,7 +48,7 @@ class Addnewaccountwindow(Tk.Toplevel):
         self.currenttypeselect.set(self.accounttypelist_name[0])
 
         self.typeselectmenu = apply(Tk.OptionMenu, (self.input_form, self.currenttypeselect) + tuple(self.accounttypelist_name))
-        self.typeselectmenu.config(width=15)
+        self.typeselectmenu.config(width=15, font=self.customFont)
         self.typeselectmenu.pack()
 
         #Label and input textbox for start money of this account
