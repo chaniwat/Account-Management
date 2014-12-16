@@ -249,13 +249,13 @@ class Main_accountsection(Tk.Frame):
         self.currentaccountselect.set(self.main.database.get_currentaccountname())
 
         self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect, ''))
-        self.accountselectmenu.config(width=25)
+        self.accountselectmenu.config(width=25, font=self.customFont)
         self.accountselectmenu.pack(padx=10, pady=25, side="left")
         self.accountselectmenuelement = self.accountselectmenu.children["menu"]
         self.accountselectmenuelement.delete(0, 'end')
 
         for account in self.accountlist:
-            self.accountselectmenuelement.add_command(label=account[1], command=lambda account_id=account[0]: self.changedatareport(account_id))
+            self.accountselectmenuelement.add_command(label=account[1], command=lambda account_id=account[0]: self.changedatareport(account_id), font=self.customFont)
 
         #Create button to edit the current select account
         Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount, font=self.customFont).pack(padx=5, side="left")
