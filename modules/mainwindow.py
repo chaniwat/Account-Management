@@ -169,6 +169,8 @@ class Main_mainsection(Tk.Frame):
         #Temporary variable to save the reference to mainwindow
         self.main = main
 
+        self.customFont = tkFont.Font(family="Browallia New", size=13)
+
         #Get current account type
         print self.main.database.get_currentaccounttype()
 
@@ -184,7 +186,7 @@ class Main_mainsection(Tk.Frame):
         self.rightsection.pack(side="left", fill="both", expand=1)
 
         #Create Button for adding new record
-        Tk.Button(self.rightsection, text="เพิ่มรายการ", height=3, command=self.main.newrecord).pack(side="top", fill="x")
+        Tk.Button(self.rightsection, text="เพิ่มรายการ", height=3, command=self.main.newrecord, font=self.customFont).pack(side="top", fill="x")
 
         #rightmain section
         self.rightmain_section_frame = VerticalScrolledFrame(self.rightsection, relief="groove", bd=3)
