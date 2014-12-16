@@ -166,7 +166,6 @@ class Main_menubar(Tk.Menu):
         self.accountmenu.add_command(label="สรุปเงินทั้งหมด", command=lambda: self.hello(), font=self.customFont)
         self.accountmenu.add_separator()
         self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: self.main.newaccount(), font=self.customFont)
-        self.accountmenu.add_command(label="ลบบัญชี" ,command=lambda: self.hello(), font=self.customFont)
         self.add_cascade(label="บัญชี", menu=self.accountmenu, font=self.customFont)
 
         #Set parent to use this menubar
@@ -463,6 +462,17 @@ class confirmdetelerecordprompt(Tk.Toplevel):
     def cancelaction(self):
         self.result = False
         self.destroy()
+
+class totalaccountwindow(Tk.Toplevel):
+    def __init__(self, main, parent):
+        #Temporary variable to save the reference to main
+        self.main = main
+
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Pre-defined result for none action
+        self.result = False
 
 #VerticalScrolledFrame
 class VerticalScrolledFrame(Tk.Frame):
