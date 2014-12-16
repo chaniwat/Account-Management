@@ -295,6 +295,9 @@ class Main_accountpropertysection(Tk.Frame):
         self.pack(fill="both", expand=1)
         self.pack_propagate(0)
 
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
         #fetch user info data
         userinfodata = self.main.database.get_currentuserinfo()[1]
         #Create key dict translate to local language
@@ -302,17 +305,17 @@ class Main_accountpropertysection(Tk.Frame):
         translate_dict = {u"USER_NAME":u"ชื่อ", u"USER_SURNAME":u"นามสกุล", u"USER_NICKNAME":u"ชื่อเล่น", u"USER_BIRTHDAY":u"วันเกิด", u"USER_CREATEDATE":u"ผู้ใช้สร้างวันที่", u"USER_LASTEDITDATE":u"อัพเดทล่าสุด"}
 
         #Label for title
-        Tk.Label(self, text="ข้อมูลผูใช้").pack(pady=10)
+        Tk.Label(self, text="ข้อมูลผูใช้", font=self.customFont).pack(pady=10)
 
         for key in keys_sort:
             tempframe = Tk.Frame(self)
             tempframe.pack(fill="x")
 
             #Create label
-            Tk.Label(tempframe, text=translate_dict[key]+u" : "+userinfodata[key]).pack(side="left")
+            Tk.Label(tempframe, text=translate_dict[key]+u" : "+userinfodata[key], font=self.customFont).pack(side="left")
 
         #Label for title
-        Tk.Label(self, text="ข้อมูลบัญชีปัจจุบัน").pack(pady=10)
+        Tk.Label(self, text="ข้อมูลบัญชีปัจจุบัน", font=self.customFont).pack(pady=10)
 
         #fetch current account info
         accountinfodata = self.main.database.get_currentaccountinfo()
@@ -325,7 +328,7 @@ class Main_accountpropertysection(Tk.Frame):
             tempframe.pack(fill="x")
 
             #Create label
-            Tk.Label(tempframe, text=key+u" : %s" % data).pack(side="left")
+            Tk.Label(tempframe, text=key+u" : %s" % data, font=self.customFont).pack(side="left")
 
 #Data report table section + support class
 class Main_datareportsection:
