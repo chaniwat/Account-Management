@@ -80,6 +80,13 @@ class database:
 
         return True
 
+    def deleterecord(self, record_id):
+        """delete the select record"""
+        self.cursor.execute("DELETE FROM change_info WHERE change_id="+str(record_id))
+        self.connectresult.commit()
+
+        return True
+
     def set_currentaccountid(self, account_id=1):
         """Set the current account to show to user"""
         self.currentaccountid = account_id

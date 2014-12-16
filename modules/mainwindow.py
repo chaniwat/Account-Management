@@ -94,9 +94,6 @@ class Mainwindow:
         if newrecordwindow.result:
             self.refreshdata()
 
-    def closethisaccount(self):
-        print "closethisaccount"
-
     def deletethisaccount(self):
         """summon the confirm prompt dialog"""
         actionresult = confirmdeteleaccountprompt(self.root)
@@ -108,6 +105,15 @@ class Mainwindow:
                 self.account_section.pack_forget()
                 self.account_section.destroy()
                 self.account_section = Main_accountsection(self, self.parentaccount_section)
+
+    def deleterecord(self, record_id):
+        """delete the record"""
+        actionresult = confirmdetelerecordprompt(self.root)
+        self.root.wait_window(actionresult)
+        if actionresult.result:
+            result = self.database.deleterecord(record_id)
+            if result:
+                self.refreshdata()
 
 #By Section Class
 #Main Menu
@@ -250,9 +256,6 @@ class Main_accountsection(Tk.Frame):
         self.accountnamelabel = Tk.Label(self, text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname(), font=self.customFont)
         self.accountnamelabel.pack(side="left", pady=25)
 
-        #Create button to close the current select account
-        Tk.Button(self, text="ปิดบัญชีปัจจุบัน", command=self.main.closethisaccount, font=self.customFont).pack(padx=5, side="left")
-
         #Create button to delete the current select account
         Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.main.deletethisaccount, font=self.customFont).pack(padx=5, side="left")
 
@@ -318,11 +321,8 @@ class Main_datareportsection:
             Tk.Label(frametemp, text=data[0], width=10, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
             Tk.Label(frametemp, text=data[1], width=25, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
             Tk.Label(frametemp, wraplength=350, justify="left", text=data[2], relief="ridge", bg="white", font=self.customFont).pack(expand=1, side="left", fill="both")
-            Tk.Button(frametemp, width=8, text="ลบ", command=lambda change_id=data[4]: self.printa(change_id), font=self.customFont).pack(side="right", ipadx=1)
+            Tk.Button(frametemp, width=8, text="ลบ", command=lambda change_id=data[4]: self.main.deleterecord(change_id), font=self.customFont).pack(side="right", ipadx=1)
             Tk.Label(frametemp, width=13, text=data[3], relief="ridge", bg="white", font=self.customFont).pack(side="right", fill="both")
-
-    def printa(self, text):
-        print text
 
 #Dedicated window class
 class confirmdeteleaccountprompt(Tk.Toplevel):
@@ -351,6 +351,58 @@ class confirmdeteleaccountprompt(Tk.Toplevel):
 
         #Create Label
         Tk.Label(self, text="ต้องการลบบัญชีปัจจุบัน?", font=self.customFont).pack()
+
+        #Create action button
+        frame_temp = Tk.Frame(self)
+        frame_temp.pack()
+
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
+
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height(),
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
+
+    def confirmaction(self):
+        self.result = True
+        self.destroy()
+
+    def cancelaction(self):
+        self.result = False
+        self.destroy()
+
+class confirmdetelerecordprompt(Tk.Toplevel):
+    def __init__(self, parent):
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Pre-defined result for none action
+        self.result = False
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, parent)
+        #Set title
+        self.title("Confirm")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Window size
+        self.minsize(200,100)
+        #Focus to self
+        self.focus_set()
+
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
+        #Create Label
+        Tk.Label(self, text="ต้องการลบรายการนี้หรือไม่?", font=self.customFont).pack()
 
         #Create action button
         frame_temp = Tk.Frame(self)
