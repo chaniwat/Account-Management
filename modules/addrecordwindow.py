@@ -37,7 +37,7 @@ class Addnewrecordwindow(Tk.Toplevel):
         self.input_form.pack()
 
         #Create label and selection menu for change type by current account type
-        Tk.Label(self.input_form, text="ประเภทรายการ", font=customFont).pack()
+        Tk.Label(self.input_form, text="ประเภทรายการ", font=self.customFont).pack()
         if accounttype == "ACC_WALLET":
             self.recordtypelist = []
             self.recordtypelist_name = ("CHANGE_WALLET_INCOME", "CHANGE_WALLET_EAT", "CHANGE_WALLET_BUY", "CHANGE_WALLET_ENTERTAINMENT", "CHANGE_WALLET_TRAVEL", "CHANGE_WALLET_BILL")
