@@ -163,7 +163,7 @@ class Main_menubar(Tk.Menu):
 
         #account menu
         self.accountmenu = Tk.Menu(self, tearoff=0)
-        self.accountmenu.add_command(label="สรุปเงินทั้งหมด", command=lambda: self.hello(), font=self.customFont)
+        self.accountmenu.add_command(label="ดูบัญชีทั้งหมด", command=lambda: self.summon_accountoverall(), font=self.customFont)
         self.accountmenu.add_separator()
         self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: self.main.newaccount(), font=self.customFont)
         self.add_cascade(label="บัญชี", menu=self.accountmenu, font=self.customFont)
@@ -178,6 +178,11 @@ class Main_menubar(Tk.Menu):
         self.main.database.closedatabase()
         #call reopen program
         self.main.root.reopenprogram()
+
+    def summon_accountoverall(self):
+        """summon the overall account window"""
+        overallwindow = totalaccountwindow(self.main, self.main.root)
+        self.main.root.wait_window(overallwindow)
 
     def exitprogram(self):
         """exit the program"""
@@ -304,7 +309,7 @@ class Main_accountpropertysection(Tk.Frame):
         translate_dict = {u"USER_NAME":u"ชื่อ", u"USER_SURNAME":u"นามสกุล", u"USER_NICKNAME":u"ชื่อเล่น", u"USER_BIRTHDAY":u"วันเกิด", u"USER_CREATEDATE":u"ผู้ใช้สร้างวันที่", u"USER_LASTEDITDATE":u"อัพเดทล่าสุด"}
 
         #Label for title
-        Tk.Label(self, text="ข้อมูลผูใช้", font=self.customFont).pack(pady=10)
+        Tk.Label(self, text="ข้อมูลผู้ใช้", font=self.customFont).pack(pady=10)
 
         for key in keys_sort:
             tempframe = Tk.Frame(self)
@@ -313,14 +318,15 @@ class Main_accountpropertysection(Tk.Frame):
             #Create label
             Tk.Label(tempframe, text=translate_dict[key]+u" : "+userinfodata[key], font=self.customFont).pack(side="left")
 
+        separator = Tk.Frame(self, height=2, bd=1, relief="sunken")
+        separator.pack(fill="x", padx=5, pady=10)
+
         #Label for title
-        Tk.Label(self, text="ข้อมูลบัญชีปัจจุบัน", font=self.customFont).pack(pady=10)
+        Tk.Label(self, text="ข้อมูลบัญชีปัจจุบัน", font=self.customFont).pack(pady=8)
 
         #fetch current account info
         accountinfodata = self.main.database.get_currentaccountinfo()
         keys_sort = [u"ชื่อบัญชี", u"ประเภทบัญชี", u"อัพเดทล่าสุด", u"จำนวนเงินปัจจุบัน"]
-
-        print accountinfodata
         
         for key, data in zip(keys_sort, accountinfodata):
             tempframe = Tk.Frame(self)
@@ -471,8 +477,47 @@ class totalaccountwindow(Tk.Toplevel):
         #Temporary variable to save the reference to parent
         self.parent = parent
 
-        #Pre-defined result for none action
-        self.result = False
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, self.parent)
+        #Set title
+        self.title("Account Overview")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Focus to self
+        self.focus_set()
+
+        account_list = self.main.database.get_currentuserallaccount()
+
+        moneytotal = 0
+
+        for account in account_list:
+            frametemp = Tk.Frame(self, relief="ridge", bd=2)
+            frametemp.pack(fill="both")
+            frameleft = Tk.Frame(frametemp)
+            frameleft.pack(side="left")
+            Tk.Label(frameleft, anchor="w", text=u"ชื่อบัญชี : "+account[0], width=50).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+account[1]).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"วันสุดท้ายที่อัพเดท : "+account[2]).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3])).pack(fill="x")
+            frameright = Tk.Frame(frametemp)
+            frameright.pack(side="right", fill="y")
+            Tk.Button(frameright, text="เปิดบัญชี", width=5, command=lambda account_id=account[4]: self.changeaccount(account_id)).pack(fill="both", expand=1)
+            moneytotal += account[3]
+
+        frametemp = Tk.Frame(self, relief="ridge", bd=2)
+        frametemp.pack(fill="both")
+        Tk.Label(frametemp, text=u"เงินรวมทั้งหมด : "+str(moneytotal)).pack(padx=8, pady=8)
+
+    def changeaccount(self, account_id):
+        """change account to target id and close self window"""
+        self.main.database.set_currentaccountid(account_id)
+        self.main.account_section.pack_forget()
+        self.main.account_section.destroy()
+        self.main.account_section = Main_accountsection(self.main, self.main.parentaccount_section)
+        self.main.refreshdata()
+        self.destroy()
 
 #VerticalScrolledFrame
 class VerticalScrolledFrame(Tk.Frame):

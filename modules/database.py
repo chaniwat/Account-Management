@@ -155,6 +155,22 @@ class database:
 
         return self.cursor.fetchall()
 
+    def get_currentuserallaccount(self):
+        """return all account of current user
+
+        Result:
+            True, result
+
+        return result dict keywords:
+            account_name,
+            account_type,
+            account_lastupdate,
+            account_currentmoney
+        """
+        self.cursor.execute("SELECT account_name, account_type, account_lastupdate, account_currentmoney, account_id FROM account_info")
+
+        return self.cursor.fetchall()
+
     def get_currentuserinfo(self):
         """return the value of current user_info
 
