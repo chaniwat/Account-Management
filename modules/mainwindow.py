@@ -481,5 +481,3 @@ class VerticalScrolledFrame(Tk.Frame):
 
         #Bind mousewheel to scroll
         canvas.bind_all("<MouseWheel>", _on_mousewheel)
-
-   
