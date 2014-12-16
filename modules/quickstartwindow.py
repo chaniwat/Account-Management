@@ -178,12 +178,13 @@ class passwordprompt(Tk.Toplevel):
         #Create Entry
         self.passwordbox = Tk.Entry(self)
         self.passwordbox.pack()
+        self.passwordbox.focus_set()
 
         #Create action button
         frame_temp = Tk.Frame(self)
         frame_temp.pack()
 
-        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยืนยัน", command=lambda: self.confirmaction(None), font=self.customFont).pack(side="left")
         Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
         
         #Centered window
@@ -196,7 +197,10 @@ class passwordprompt(Tk.Toplevel):
         y = (self.winfo_screenheight() // 2) - (h // 2)
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
-    def confirmaction(self):
+        #bind enter button
+        self.passwordbox.bind("<Return>", self.confirmaction)
+
+    def confirmaction(self, event):
         if self.passwordbox.get() == self.filepwd:
             self.result = True
             self.destroy()

@@ -67,7 +67,7 @@ class Addnewrecordwindow(Tk.Toplevel):
         Tk.Frame(self.input_form, height=15).pack()
 
         #Create Button to submit the from
-        Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างบัญชีใหม่", command=self.createnewrecord, font=self.customFont).pack(fill="x")
+        Tk.Button(self.input_form, width=30, height=1, bd=4, text="เพิ่มรายการใหม่", command=self.createnewrecord, font=self.customFont).pack(fill="x")
 
         self.update()
         w_req, h_req = self.winfo_width(), self.winfo_height()

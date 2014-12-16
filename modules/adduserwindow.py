@@ -48,6 +48,8 @@ class Addnewuserwindow(Tk.Toplevel):
                 self.pwdstate = Tk.IntVar()
                 self.textboxs[datakey] = Tk.Checkbutton(frame_temp, text="มี", variable=self.pwdstate, command=self.togglepasswordtextbox, font=self.customFont)
                 self.textboxs[datakey].pack()
+                #Bind return event
+                self.textboxs[datakey].bind("<Return>", self.createnewuser)
             elif datakey == "birthday":
                 birthframe_temp = Tk.Frame(frame_temp)
                 birthframe_temp.pack()
@@ -59,6 +61,10 @@ class Addnewuserwindow(Tk.Toplevel):
                 Tk.Label(birthframe_temp, text="-", font=self.customFont).pack(side="left")
                 self.textboxs[datakey+"-y"] = Tk.Entry(birthframe_temp, width=5)
                 self.textboxs[datakey+"-y"].pack(side="left")
+                #Bind return event
+                self.textboxs[datakey+"-d"].bind("<Return>", self.createnewuser)
+                self.textboxs[datakey+"-m"].bind("<Return>", self.createnewuser)
+                self.textboxs[datakey+"-y"].bind("<Return>", self.createnewuser)
             else:
                 #Create entry and set variable to reference to this new entry that created
                 self.textboxs[datakey] = Tk.Entry(frame_temp)
@@ -66,12 +72,17 @@ class Addnewuserwindow(Tk.Toplevel):
                 #if datakey is pwd, let it disabled first
                 if datakey == "pwd":
                     self.textboxs["pwd"].config(state="disabled")
+                #Bind return event
+                self.textboxs[datakey].bind("<Return>", self.createnewuser)
+
+        #Set focus
+        self.textboxs["name"].focus_set()
 
         #Create empty frame to create some space
         Tk.Frame(self.input_form, height=15).pack()
 
         #Create Button to submit the from
-        Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=self.createnewuser, font=self.customFont).pack(fill="x")
+        Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=lambda: self.createnewuser(None), font=self.customFont).pack(fill="x")
 
         self.update()
         w_req, h_req = self.winfo_width(), self.winfo_height()
@@ -82,7 +93,7 @@ class Addnewuserwindow(Tk.Toplevel):
         y = ((self.winfo_screenheight() // 2) - (h // 2))
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
-    def createnewuser(self):
+    def createnewuser(self, event):
         #Get all data in textbox (entry widget) into dict
         data = dict()
         for key in self.datakeys:
