@@ -53,6 +53,11 @@ class Addnewrecordwindow(Tk.Toplevel):
 
         self.typeselectmenu = apply(Tk.OptionMenu, (self.input_form, self.currenttypeselect) + (tuple(self.keysorttype)))
         self.typeselectmenu.pack()
+        self.typeselectmenuelement = self.typeselectmenu.children["menu"]
+        self.typeselectmenuelement.delete(0, 'end')
+
+        for recordtype in self.keysorttype:
+            self.typeselectmenuelement.add_command(label=recordtype, command=lambda recordtype=recordtype: self.currenttypeselect.set(recordtype))
 
         #Create label and textbox for desciption of this record
         Tk.Label(self.input_form, text="รายละเอียดรายการ", font=self.customFont).pack()

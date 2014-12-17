@@ -52,6 +52,11 @@ class Addnewaccountwindow(Tk.Toplevel):
         self.typeselectmenu = apply(Tk.OptionMenu, (self.input_form, self.currenttypeselect) + tuple(self.accounttypelist_name))
         self.typeselectmenu.config(width=15, font=self.customFont)
         self.typeselectmenu.pack()
+        self.typeselectmenuelement = self.typeselectmenu.children["menu"]
+        self.typeselectmenuelement.delete(0, 'end')
+
+        for accounttype in self.accounttypelist_name:
+            self.typeselectmenuelement.add_command(label=accounttype, command=lambda accounttype=accounttype: self.currenttypeselect.set(accounttype))
 
         #Label and input textbox for start money of this account
         Tk.Label(self.input_form, text="เงินเริ่มต้น (จำนวนเต็ม)", font=self.customFont).pack()
