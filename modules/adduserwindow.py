@@ -27,7 +27,7 @@ class Addnewuserwindow(Tk.Toplevel):
         self.transient(self.parent)
         self.grab_set()
         #Prevent user to resize this window
-        self.resizable(0, 0)
+        self.minsize(400,80)
         #Focus to self
         self.focus_set()
 
@@ -88,8 +88,8 @@ class Addnewuserwindow(Tk.Toplevel):
         Tk.Frame(self.input_form, height=15).pack()
 
         #Create Button to submit the from
-        confirmbtn = Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=lambda: self.createnewuser(None), font=self.customFont)
-        confirmbtn.pack(fill="x")
+        confirmbtn = Tk.Button(self.input_form, width=15, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=lambda: self.createnewuser(None), font=self.customFont)
+        confirmbtn.pack(pady=13)
         confirmbtn.bind("<Return>", self.createnewuser)
 
         self.update()

@@ -548,7 +548,7 @@ class totalaccountwindow(Tk.Toplevel):
             Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3]), font=self.customFont).pack(fill="x")
             frameright = Tk.Frame(frametemp)
             frameright.pack(side="right", fill="y")
-            Tk.Button(frameright, text="เปิดบัญชี", width=8, command=lambda account_id=account[4]: self.changeaccount(account_id), font=self.customFont).pack(fill="both", expand=1)
+            Tk.Button(frameright, text="เปิดบัญชี", width=8, height=1, command=lambda account_id=account[4]: self.changeaccount(account_id), font=self.customFont).pack(padx=12, pady=12)
             moneytotal += account[3]
 
         frametemp = Tk.Frame(self, relief="ridge", bd=2)
@@ -640,11 +640,11 @@ class Alertdialog(Tk.Toplevel):
         self.focus_set()
 
         #tkFont
-        self.customFont = tkFont.Font(family="Browallia New", size=13)
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
 
         Tk.Label(self, text=text, font=self.customFont).pack()
         confirmbtn = Tk.Button(self, text="ยืนยัน", command=self.destroy, font=self.customFont)
-        confirmbtn.pack()
+        confirmbtn.pack(pady=13)
         confirmbtn.focus_set()
         def destroyself(*arg):
             self.destroy()
