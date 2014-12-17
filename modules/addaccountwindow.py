@@ -5,6 +5,7 @@ import Tkinter as Tk
 import tkFont
 import database as db
 import time
+import mainwindow 
 
 class Addnewaccountwindow(Tk.Toplevel):
     def __init__(self, main, parent):
@@ -40,6 +41,7 @@ class Addnewaccountwindow(Tk.Toplevel):
         Tk.Label(self.input_form, text="ชื่อบัญชี (เช่น ธนาคาร A)", font=self.customFont).pack()
         self.namebox = Tk.Entry(self.input_form)
         self.namebox.pack()
+        self.namebox.bind("<Return>", self.createnewaccount)
 
         #Create label and selection menu for account type
         Tk.Label(self.input_form, text="ประเภทของบัญชี", font=self.customFont).pack()
@@ -52,15 +54,20 @@ class Addnewaccountwindow(Tk.Toplevel):
         self.typeselectmenu.pack()
 
         #Label and input textbox for start money of this account
-        Tk.Label(self.input_form, text="เงินเริ่มต้น", font=self.customFont).pack()
+        Tk.Label(self.input_form, text="เงินเริ่มต้น (จำนวนเต็ม)", font=self.customFont).pack()
         self.moneybox = Tk.Entry(self.input_form)
         self.moneybox.pack()
+        self.moneybox.bind("<Return>", self.createnewaccount)
 
         #Create empty frame to create some space
         Tk.Frame(self.input_form, height=15).pack()
 
         #Create Button to submit the from
-        Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างบัญชีใหม่", command=self.createnewaccount, font=self.customFont).pack(fill="x")
+        confirmbtn = Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างบัญชีใหม่", command=self.createnewaccount, font=self.customFont)
+        confirmbtn.pack(fill="x")
+        confirmbtn.bind("<Return>", self.createnewaccount)
+
+        self.namebox.focus_set()
 
         self.update()
         w_req, h_req = self.winfo_width(), self.winfo_height()
@@ -71,15 +78,26 @@ class Addnewaccountwindow(Tk.Toplevel):
         y = ((self.winfo_screenheight() // 2) - (h // 2))
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
-    def createnewaccount(self):
+    def createnewaccount(self, *arg):
         #Collect data
         data = dict()
-        data["name"] = self.namebox.get()
+        if self.namebox.get() == "":
+            self.wait_window(mainwindow.Alertdialog(self, text="กรุณาใส่ชื่อบัญชี"))
+            return False
+        else:
+            data["name"] = self.namebox.get()
         if self.currenttypeselect.get() == u"บัญชีธนาคาร":
             data["type"] = "ACC_BANK"
         else:
             data["type"] = "ACC_POT"
-        data["initmoney"] = self.moneybox.get()
+        if self.moneybox.get() == "":
+            self.wait_window(mainwindow.Alertdialog(self, text="กรุณาใส่เงิน"))
+            return False
+        elif not self.moneybox.get().isdigit():
+            self.wait_window(mainwindow.Alertdialog(self, text="กรุณาใส่เงินแค่ตัวเลข"))
+            return False
+        else:
+            data["initmoney"] = self.moneybox.get()
 
         self.result, self.newid = self.main.database.addaccount(data)
 

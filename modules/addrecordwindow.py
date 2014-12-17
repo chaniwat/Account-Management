@@ -39,29 +39,33 @@ class Addnewrecordwindow(Tk.Toplevel):
         #Create label and selection menu for change type by current account type
         Tk.Label(self.input_form, text="ประเภทรายการ", font=self.customFont).pack()
         if accounttype == "ACC_WALLET":
-            self.recordtypelist = []
-            self.recordtypelist_name = ("CHANGE_WALLET_INCOME", "CHANGE_WALLET_EAT", "CHANGE_WALLET_BUY", "CHANGE_WALLET_ENTERTAINMENT", "CHANGE_WALLET_TRAVEL", "CHANGE_WALLET_BILL")
+            self.keysorttype = [u"รายได้/เงินที่ได้", u"อาหาร", u"ซื้อของ", u"ดูหนัง", u"ท่องเที่ยว/เดินทาง", u"จ่ายบิล/อื่นๆ"]
+            self.recordtypelist = {u"รายได้/เงินที่ได้":"CHANGE_WALLET_INCOME", u"อาหาร":"CHANGE_WALLET_EAT", u"ซื้อของ":"CHANGE_WALLET_BUY", u"ดูหนัง":"CHANGE_WALLET_ENTERTAINMENT", u"ท่องเที่ยว/เดินทาง":"CHANGE_WALLET_TRAVEL", u"จ่ายบิล/อื่นๆ":"CHANGE_WALLET_BILL"}
         elif accounttype == "ACC_BANK":
-            self.recordtypelist = []
-            self.recordtypelist_name = ("CHANGE_BANK_DEPOSIT", "CHANGE_BANK_WITHDRAW", "CHANGE_BANK_TRANSFER_IN", "CHANGE_BANK_TRANSFER_OUT", "CHANGE_BANK_PAY")
+            self.keysorttype = [u"ฝากเงิน", u"ถอนเงิน", u"โอน(รับ)", u"โอน(จ่าย)", u"จ่ายเงิน"]
+            self.recordtypelist = {u"ฝากเงิน":"CHANGE_BANK_DEPOSIT", u"ถอนเงิน":"CHANGE_BANK_WITHDRAW", u"โอน(รับ)":"CHANGE_BANK_TRANSFER_IN", u"โอน(จ่าย)":"CHANGE_BANK_TRANSFER_OUT", u"จ่ายเงิน":"CHANGE_BANK_PAY"}
         elif accounttype == "ACC_POT":
-            self.recordtypelist = []
-            self.recordtypelist_name = ("CHANGE_POT_DEPOSIT", "CHANGE_POT_WITHDRAW")
+            self.keysorttype = [u"ออมเงิน", u"ถอนเงิน"]
+            self.recordtypelist = {u"ออมเงิน":"CHANGE_POT_DEPOSIT", u"ถอนเงิน":"CHANGE_POT_WITHDRAW"}
         self.currenttypeselect = Tk.StringVar(self)
-        self.currenttypeselect.set(self.recordtypelist_name[0])
+        self.currenttypeselect.set(self.keysorttype[0])
 
-        self.typeselectmenu = apply(Tk.OptionMenu, (self.input_form, self.currenttypeselect) + (self.recordtypelist_name))
+        self.typeselectmenu = apply(Tk.OptionMenu, (self.input_form, self.currenttypeselect) + (tuple(self.keysorttype)))
         self.typeselectmenu.pack()
 
         #Create label and textbox for desciption of this record
         Tk.Label(self.input_form, text="รายละเอียดรายการ", font=self.customFont).pack()
         self.description = Tk.Entry(self.input_form)
         self.description.pack()
+        #Bind return event
+        self.description.bind("<Return>", self.createnewrecord)
 
         #Create lael and textbox for money of this record
-        Tk.Label(self.input_form, text="จำนวนเงิน", font=self.customFont).pack()
+        Tk.Label(self.input_form, text="จำนวนเงิน (จำนวนเต็ม)", font=self.customFont).pack()
         self.money = Tk.Entry(self.input_form)
         self.money.pack()
+        #Bind return event
+        self.money.bind("<Return>", self.createnewrecord)
 
         #Create empty frame to create some space
         Tk.Frame(self.input_form, height=15).pack()
@@ -78,10 +82,10 @@ class Addnewrecordwindow(Tk.Toplevel):
         y = ((self.winfo_screenheight() // 2) - (h // 2))
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
-    def createnewrecord(self):
+    def createnewrecord(self, *arg):
         #Collect data
         data = dict()
-        data["type"] = self.currenttypeselect.get()
+        data["type"] = self.recordtypelist[self.currenttypeselect.get()]
         data["description"] = self.description.get()
         data["amtmoney"] = self.money.get()
 

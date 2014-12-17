@@ -3,8 +3,7 @@
 
 import sqlite3 as sql
 import os, md5, time
-from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, \
-                       DATABASE_DIRECTORY_PATH
+from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, DATABASE_DIRECTORY_PATH
 
 DATABASE_CHANGE_TYPE_PLUS = ["CHANGE_WALLET_INCOME", "CHANGE_BANK_DEPOSIT", "CHANGE_POT_DEPOSIT", "CHANGE_BANK_TRANSFER_IN"]
 
@@ -54,6 +53,7 @@ class database:
         self.cursor.execute("INSERT INTO account_info VALUES(NULL, '"+data["name"]+"', '"+data["type"]+"', 'CON', '"+time.strftime("%d-%m-%Y")+"', "+data["initmoney"]+")")
         account_id = self.cursor.lastrowid
         self.cursor.execute("INSERT INTO change_info VALUES(NULL, "+str(self.cursor.lastrowid)+", 'CHANGE_INITIATE', '"+time.strftime("%d-%m-%Y")+"', 'ACCOUNT_INITIATE_TEXT', "+data["initmoney"]+")")
+        self.cursor.execute("UPDATE user_info SET vaule='"+time.strftime("%d-%m-%Y")+"' WHERE property='USER_LASTEDITDATE'")
         self.connectresult.commit()       
 
         return True, account_id
@@ -66,6 +66,7 @@ class database:
         else:
             #account_info table
             self.cursor.execute("DELETE FROM account_info WHERE account_id="+str(account_id))
+            self.cursor.execute("UPDATE user_info SET vaule='"+time.strftime("%d-%m-%Y")+"' WHERE property='USER_LASTEDITDATE'")
             self.connectresult.commit()
             self.set_currentaccountid()
             return True
@@ -82,6 +83,8 @@ class database:
             self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
             newmoney = self.cursor.fetchone()[0]+int(data["amtmoney"])
             self.cursor.execute("UPDATE account_info SET account_currentmoney="+str(newmoney)+" WHERE account_id="+str(self.get_currentaccountid()))
+            self.cursor.execute("UPDATE account_info SET account_lastupdate='"+time.strftime("%d-%m-%Y")+"' WHERE account_id="+str(self.get_currentaccountid()))
+            self.cursor.execute("UPDATE user_info SET vaule='"+time.strftime("%d-%m-%Y")+"' WHERE property='USER_LASTEDITDATE'")
             self.connectresult.commit()
         else:
             self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
@@ -125,9 +128,17 @@ class database:
             self.connectresult.commit()
 
         self.cursor.execute("DELETE FROM change_info WHERE change_id="+str(record_id))
+        self.cursor.execute("UPDATE account_info SET account_lastupdate='"+time.strftime("%d-%m-%Y")+"' WHERE account_id="+str(self.get_currentaccountid()))
+        self.cursor.execute("UPDATE user_info SET vaule='"+time.strftime("%d-%m-%Y")+"' WHERE property='USER_LASTEDITDATE'")
         self.connectresult.commit()
 
         return True
+
+    def get_recordtype(self, record_id):
+        """return the type of record_id"""
+        self.cursor.execute("SELECT change_type FROM change_info WHERE change_id="+str(record_id))
+        result = self.cursor.fetchone()[0]
+        return result
 
     def set_currentaccountid(self, account_id=1):
         """Set the current account to show to user"""
@@ -219,7 +230,7 @@ def createnewaccount(data):
     """
 
     #Create a filename for this account by convert name string to md5
-    filename = md5.new(data["name"].encode("utf-8")).hexdigest()+FILE_EXTENSION_DATABASE
+    filename = md5.new(data["name"].encode("utf-8")+data["surname"].encode("utf-8")).hexdigest()+FILE_EXTENSION_DATABASE
 
     #Check directory to store the database file. if not exist create a new one
     if not os.path.exists(DATABASE_DIRECTORY_PATH):
@@ -260,10 +271,10 @@ def createnewaccount(data):
         db_cursor.executemany("INSERT INTO user_info VALUES(?, ?)", user_info_property)
         #account_info table
         db_cursor.execute("CREATE TABLE account_info(account_id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, account_type TEXT, account_status TEXT, account_lastupdate TEXT, account_currentmoney INTEGER)")
-        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'ACCOUNT_WALLET_NAME', 'ACC_WALLET', 'CON', '"+data["createdate"]+"', "+data["initmoney"]+")")
+        db_cursor.execute("INSERT INTO account_info VALUES(NULL, 'กระเป๋าเงิน', 'ACC_WALLET', 'CON', '"+data["createdate"]+"', "+data["initmoney"]+")")
         #change_info table
         db_cursor.execute("CREATE TABLE change_info(change_id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, change_type TEXT, change_date TEXT, change_description TEXT, change_amount INTEGER)")
-        db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"]+"', 'ACCOUNT_INITIATE_TEXT', "+data["initmoney"]+")")
+        db_cursor.execute("INSERT INTO change_info VALUES(NULL, 1, 'CHANGE_INITIATE', '"+data["createdate"]+"', 'เงินเริ่มต้น', "+data["initmoney"]+")")
 
     #return success
     return (True, "DB_SUCCESS_CREATE", filename)

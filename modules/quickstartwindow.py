@@ -8,6 +8,7 @@ import os, time
 from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, \
                        DATABASE_DIRECTORY_PATH, MONTH_3_STR_TO_INT
 from adduserwindow import Addnewuserwindow as window_Addnewuserwindow
+from mainwindow import Alertdialog as window_Alertdialog
 
 class Quickstartwindow(Tk.Toplevel):
     def __init__(self, root):
@@ -104,7 +105,7 @@ class Quickstartwindow(Tk.Toplevel):
             Tk.Button(frame_temp_btn, text="Login", command=lambda filename=filename: self.selectuser(filename)).pack(padx=6, side="left")
             Tk.Button(frame_temp_btn, text="Delete", command=lambda filename=filename: self.deleteuser(filename)).pack(padx=6, side="left")
 
-    def selectuser(self, filename):
+    def selectuser(self, filename, flag=False):
         """Select user to work with and send filename to root for summon main window
         and destroy this window
         but if select filename has password will prompt the dialog for user to insert password
@@ -112,7 +113,7 @@ class Quickstartwindow(Tk.Toplevel):
         #Get user_info of this user
         data = db.getuserinfoaccount(filename)[1]
         #check if filename have password
-        if data["USER_HAS_PWD"] == "True":
+        if data["USER_HAS_PWD"] == "True" and not flag:
             passprompt = passwordprompt(self, data["USER_PWD"])
             self.wait_window(passprompt)
             if passprompt.result:
@@ -127,11 +128,26 @@ class Quickstartwindow(Tk.Toplevel):
         prompt = confirmdeteleuserprompt(self)
         self.wait_window(prompt)
         if prompt.result:
-            result = db.deleteaccount(filename)
-            if result[0]:
-                self.refreshthiswindow()
-            else:
-                print result[1]
+            #Get user_info of this user
+            data = db.getuserinfoaccount(filename)[1]
+            #check if filename have password
+            if data["USER_HAS_PWD"] == "True":
+                passprompt = passwordprompt(self, data["USER_PWD"])
+                self.wait_window(passprompt)
+                if passprompt.result:
+                    result = db.deleteaccount(filename)
+                    if result[0]:
+                        self.refreshthiswindow()
+                    else:
+                        print result[1]
+                else:
+                    return False
+            else:      
+                result = db.deleteaccount(filename)
+                if result[0]:
+                    self.refreshthiswindow()
+                else:
+                    print result[1]
 
     def refreshthiswindow(self):
         """Refresh this window by close and re-summon"""
@@ -144,7 +160,7 @@ class Quickstartwindow(Tk.Toplevel):
         adduserwindow = window_Addnewuserwindow(self)
         self.wait_window(adduserwindow)
         if adduserwindow.result[0]:
-            self.selectuser(adduserwindow.result[1])
+            self.selectuser(adduserwindow.result[1], True)
 
 class passwordprompt(Tk.Toplevel):
     def __init__(self, parent, filepwd):
@@ -176,7 +192,7 @@ class passwordprompt(Tk.Toplevel):
         Tk.Label(self, text="กรุณาใส่พาสเวริด", font=self.customFont).pack()
 
         #Create Entry
-        self.passwordbox = Tk.Entry(self)
+        self.passwordbox = Tk.Entry(self, show="*")
         self.passwordbox.pack()
         self.passwordbox.focus_set()
 
@@ -205,7 +221,9 @@ class passwordprompt(Tk.Toplevel):
             self.result = True
             self.destroy()
         else:
-            print "password not match"
+            self.wait_window(window_Alertdialog(self, text="รหัสผ่านไม่ตรงกัน"))
+            self.passwordbox.focus_set()
+            return False
 
     def cancelaction(self):
         self.result = False

@@ -100,39 +100,70 @@ class Mainwindow:
 
     def deletethisaccount(self):
         """summon the confirm prompt dialog"""
-        actionresult = confirmdeteleaccountprompt(self.root)
-        self.root.wait_window(actionresult)
-        if actionresult.result:
-            result = self.database.deleteaccount(self.database.get_currentaccountid())
-            if result:
-                self.refreshdata()
-                self.account_section.pack_forget()
-                self.account_section.destroy()
-                self.account_section = Main_accountsection(self, self.parentaccount_section)
+        #get account type first
+        accounttype = self.database.get_currentaccounttype()
+        if accounttype == "ACC_WALLET":
+            self.root.wait_window(Alertdialog(self.root, text="ไม่สามารถลบบัญชีกระเป๋าเงิน"))
+            return False
+        else:
+            actionresult = confirmdeteleaccountprompt(self.root)
+            self.root.wait_window(actionresult)
+            if actionresult.result:
+                result = self.database.deleteaccount(self.database.get_currentaccountid())
+                if result:
+                    self.refreshdata()
+                    self.account_section.pack_forget()
+                    self.account_section.destroy()
+                    self.account_section = Main_accountsection(self, self.parentaccount_section)
 
     def deleterecord(self, record_id):
         """delete the record"""
-        actionresult = confirmdetelerecordprompt(self.root)
-        self.root.wait_window(actionresult)
-        if actionresult.result:
-            result = self.database.deleterecord(record_id)
-            if result:
-                self.refreshdata()
+        #get record type first
+        recordtype = self.database.get_recordtype(record_id)
+        if recordtype == "CHANGE_INITIATE":
+            self.root.wait_window(Alertdialog(self.root, text="ไม่สามารถลบรายการเริ่มต้น"))
+            return False
+        else:
+            actionresult = confirmdetelerecordprompt(self.root)
+            self.root.wait_window(actionresult)
+            if actionresult.result:
+                result = self.database.deleterecord(record_id)
+                if result:
+                    self.refreshdata()
 
     def deletethisuser(self):
         """prompt the confirm window and Delete the select user if user confirm (delete database file pernamently)"""
         prompt = qs.confirmdeteleuserprompt(self.root)
         self.root.wait_window(prompt)
         if prompt.result:
-            #disconnect from current connect database
-            self.database.closedatabase()
-            #delete database
-            result = db.deleteaccount(self.filename)
-            if result[0]:
-                #call reopen program
-                self.root.reopenprogram()
-            else:
-                print result[1]
+            #Get user_info of this user
+            data = db.getuserinfoaccount(self.filename)[1]
+            #check if filename have password
+            if data["USER_HAS_PWD"] == "True":
+                passprompt = qs.passwordprompt(self.root, data["USER_PWD"])
+                self.root.wait_window(passprompt)
+                if passprompt.result:
+                    #disconnect from current connect database
+                    self.database.closedatabase()
+                    #delete database
+                    result = db.deleteaccount(self.filename)
+                    if result[0]:
+                        #call reopen program
+                        self.root.reopenprogram()
+                    else:
+                        print result[1]
+                else:
+                    return False
+            else:      
+                #disconnect from current connect database
+                self.database.closedatabase()
+                #delete database
+                result = db.deleteaccount(self.filename)
+                if result[0]:
+                    #call reopen program
+                    self.root.reopenprogram()
+                else:
+                    print result[1]
 
 #By Section Class
 #Main Menu
@@ -327,13 +358,17 @@ class Main_accountpropertysection(Tk.Frame):
         #fetch current account info
         accountinfodata = self.main.database.get_currentaccountinfo()
         keys_sort = [u"ชื่อบัญชี", u"ประเภทบัญชี", u"อัพเดทล่าสุด", u"จำนวนเงินปัจจุบัน"]
+        translate_dict = {u"ACC_WALLET":u"กระเป๋าเงิน", u"ACC_BANK":u"บัญชีธนาคาร", u"ACC_POT":u"กระปุกเงิน"}
         
         for key, data in zip(keys_sort, accountinfodata):
             tempframe = Tk.Frame(self)
             tempframe.pack(fill="x")
 
             #Create label
-            Tk.Label(tempframe, text=key+u" : %s" % data, font=self.customFont).pack(side="left")
+            if key == u"ประเภทบัญชี":
+                Tk.Label(tempframe, text=key+u" : %s" % translate_dict[data], font=self.customFont).pack(side="left")
+            else:
+                Tk.Label(tempframe, text=key+u" : %s" % data, font=self.customFont).pack(side="left")
 
 #Data report table section + support class
 class Main_datareportsection:
@@ -347,6 +382,11 @@ class Main_datareportsection:
         #tkFont
         self.customFont = tkFont.Font(family="Browallia New", size=15)
 
+        #Translate
+        translate_dict_record = {u"CHANGE_WALLET_INCOME":u"รายได้/เงินที่ได้", u"CHANGE_WALLET_EAT":u"อาหาร", u"CHANGE_WALLET_BUY":u"ซื้อของ", u"CHANGE_WALLET_ENTERTAINMENT":u"ดูหนัง", u"CHANGE_WALLET_TRAVEL":u"ท่องเที่ยว/เดินทาง", u"CHANGE_WALLET_BILL":u"จ่ายบิล/อื่นๆ",
+                                u"CHANGE_BANK_DEPOSIT":u"ฝากเงิน", u"CHANGE_BANK_WITHDRAW":u"ถอนเงิน", u"CHANGE_BANK_TRANSFER_IN":u"โอน(รับ)", u"CHANGE_BANK_TRANSFER_OUT":u"โอน(จ่าย)", u"CHANGE_BANK_PAY":u"จ่ายเงิน",
+                                u"CHANGE_POT_DEPOSIT":u"ออมเงิน", u"CHANGE_POT_WITHDRAW":u"ถอนเงิน", "CHANGE_INITIATE":u"เริ่มต้น"}
+
         frametemp = Tk.Frame(self.parent)
         frametemp.pack(fill="x")
         Tk.Label(frametemp, text="วันที่", width=10, relief="ridge", bg="white", font=self.customFont).pack(side="left")
@@ -359,7 +399,7 @@ class Main_datareportsection:
             frametemp = Tk.Frame(self.parent)
             frametemp.pack(fill="x")         
             Tk.Label(frametemp, text=data[0], width=10, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
-            Tk.Label(frametemp, text=data[1], width=25, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
+            Tk.Label(frametemp, text=translate_dict_record[data[1]], width=25, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
             Tk.Label(frametemp, wraplength=350, justify="left", text=data[2], relief="ridge", bg="white", font=self.customFont).pack(expand=1, side="left", fill="both")
             Tk.Button(frametemp, width=8, text="ลบ", command=lambda change_id=data[4]: self.main.deleterecord(change_id), font=self.customFont).pack(side="right", ipadx=1)
             Tk.Label(frametemp, width=13, text=data[3], relief="ridge", bg="white", font=self.customFont).pack(side="right", fill="both")
@@ -571,3 +611,24 @@ class VerticalScrolledFrame(Tk.Frame):
 
         #Bind mousewheel to scroll
         canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+class Alertdialog(Tk.Toplevel):
+    def __init__(self, parent, title="alert", text="alert"):
+        Tk.Toplevel.__init__(self, parent)
+
+        #Set title
+        self.title(title)
+
+        #Overlay and freeze the parent
+        self.transient(parent)
+        self.grab_set()
+        #Focus to self
+        self.focus_set()
+
+        Tk.Label(self, text=text).pack()
+        confirmbtn = Tk.Button(self, text="ยืนยัน", command=self.destroy)
+        confirmbtn.pack()
+        confirmbtn.focus_set()
+        def destroyself(*arg):
+            self.destroy()
+        confirmbtn.bind("<Return>", destroyself)
