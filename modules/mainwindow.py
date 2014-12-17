@@ -542,17 +542,10 @@ class totalaccountwindow(Tk.Toplevel):
             frametemp.pack(fill="both")
             frameleft = Tk.Frame(frametemp)
             frameleft.pack(side="left")
-<<<<<<< HEAD
-            Tk.Label(frameleft, anchor="w", text=u"ชื่อบัญชี : "+account[0], width=50).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+translate_dict[account[1]]).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"วันสุดท้ายที่อัพเดท : "+account[2]).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3])).pack(fill="x")
-=======
             Tk.Label(frameleft, anchor="w", text=u"ชื่อบัญชี : "+account[0], width=50, font=self.customFont).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+account[1], font=self.customFont).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+translate_dict[account[1]], font=self.customFont).pack(fill="x")
             Tk.Label(frameleft, anchor="w", text=u"วันสุดท้ายที่อัพเดท : "+account[2], font=self.customFont).pack(fill="x")
             Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3]), font=self.customFont).pack(fill="x")
->>>>>>> origin/dev-app
             frameright = Tk.Frame(frametemp)
             frameright.pack(side="right", fill="y")
             Tk.Button(frameright, text="เปิดบัญชี", width=8, command=lambda account_id=account[4]: self.changeaccount(account_id), font=self.customFont).pack(fill="both", expand=1)
@@ -570,7 +563,6 @@ class totalaccountwindow(Tk.Toplevel):
         x = ((self.winfo_screenwidth() // 2) - (w // 2))
         y = ((self.winfo_screenheight() // 2) - (h // 2))
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
-
 
     def changeaccount(self, account_id):
         """change account to target id and close self window"""
