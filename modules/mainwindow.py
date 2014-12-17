@@ -517,6 +517,9 @@ class totalaccountwindow(Tk.Toplevel):
         #Temporary variable to save the reference to parent
         self.parent = parent
 
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
         #Create new window that is the child of parent
         Tk.Toplevel.__init__(self, self.parent)
         #Set title
@@ -537,18 +540,28 @@ class totalaccountwindow(Tk.Toplevel):
             frametemp.pack(fill="both")
             frameleft = Tk.Frame(frametemp)
             frameleft.pack(side="left")
-            Tk.Label(frameleft, anchor="w", text=u"ชื่อบัญชี : "+account[0], width=50).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+account[1]).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"วันสุดท้ายที่อัพเดท : "+account[2]).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3])).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"ชื่อบัญชี : "+account[0], width=50, font=self.customFont).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+account[1], font=self.customFont).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"วันสุดท้ายที่อัพเดท : "+account[2], font=self.customFont).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3]), font=self.customFont).pack(fill="x")
             frameright = Tk.Frame(frametemp)
             frameright.pack(side="right", fill="y")
-            Tk.Button(frameright, text="เปิดบัญชี", width=5, command=lambda account_id=account[4]: self.changeaccount(account_id)).pack(fill="both", expand=1)
+            Tk.Button(frameright, text="เปิดบัญชี", width=8, command=lambda account_id=account[4]: self.changeaccount(account_id), font=self.customFont).pack(fill="both", expand=1)
             moneytotal += account[3]
 
         frametemp = Tk.Frame(self, relief="ridge", bd=2)
         frametemp.pack(fill="both")
-        Tk.Label(frametemp, text=u"เงินรวมทั้งหมด : "+str(moneytotal)).pack(padx=8, pady=8)
+        Tk.Label(frametemp, text=u"เงินรวมทั้งหมด : "+str(moneytotal), font=self.customFont).pack(padx=8, pady=8)
+
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
 
     def changeaccount(self, account_id):
         """change account to target id and close self window"""
