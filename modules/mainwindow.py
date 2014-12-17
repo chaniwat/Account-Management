@@ -128,6 +128,9 @@ class Mainwindow:
                 result = self.database.deleterecord(record_id)
                 if result:
                     self.refreshdata()
+                else:
+                    self.root.wait_window(Alertdialog(self.root, text="ไม่สามารถลบได้เนื่องจากจะทำให้เงินในบัญชีติดลบ"))
+                    return False
 
     def deletethisuser(self):
         """prompt the confirm window and Delete the select user if user confirm (delete database file pernamently)"""

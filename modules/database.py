@@ -61,7 +61,6 @@ class database:
     def deleteaccount(self, account_id):
         """Delete account by id"""
         if account_id == 1:
-            print "can't delete this account because this is a main account"
             return False
         else:
             #account_info table
@@ -90,7 +89,6 @@ class database:
             self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
             newmoney = self.cursor.fetchone()[0]-int(data["amtmoney"])
             if newmoney < 0:
-                print "money of this account not have enough money, add some money first"
                 return False
             self.cursor.execute("UPDATE account_info SET account_currentmoney="+str(newmoney)+" WHERE account_id="+str(self.get_currentaccountid()))
             self.connectresult.commit()
@@ -105,7 +103,6 @@ class database:
         self.cursor.execute("SELECT change_type FROM change_info WHERE change_id="+str(record_id))
         record_type = self.cursor.fetchone()[0]
         if record_type == "CHANGE_INITIATE":
-            print "cannont delete initiate change"
             return False
         elif record_type in DATABASE_CHANGE_TYPE_PLUS:
             self.cursor.execute("SELECT account_currentmoney FROM account_info WHERE account_id="+str(self.get_currentaccountid()))
@@ -114,7 +111,6 @@ class database:
             recordmoney = self.cursor.fetchone()[0]
             newmoney = currentmoney - recordmoney
             if newmoney < 0:
-                print "money of this account not have enough money, add some money first"
                 return False
             self.cursor.execute("UPDATE account_info SET account_currentmoney="+str(newmoney)+" WHERE account_id="+str(self.get_currentaccountid()))
             self.connectresult.commit()

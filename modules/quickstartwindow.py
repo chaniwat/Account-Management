@@ -65,6 +65,7 @@ class Quickstartwindow(Tk.Toplevel):
         """
         #Check database directory, if not exist not create any widget
         if not os.path.exists(DATABASE_DIRECTORY_PATH):
+            Tk.Label(self, text="ยังไม่มีผู้ใช้งาน โปรดเพิ่มผู้ใช้งาน", font=self.customFont).pack(fill="both", expand=1)
             return
 
         #Change working directory to database directory

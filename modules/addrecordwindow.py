@@ -116,3 +116,6 @@ class Addnewrecordwindow(Tk.Toplevel):
 
         if self.result:
             self.destroy()
+        else:
+            self.parent.wait_window(mainwindow.Alertdialog(self.parent, text="จำนวนเงินในบัญชีมีไม่เพียงพอ กรุณาเพิ่มเงินก่อน"))
+            return False
