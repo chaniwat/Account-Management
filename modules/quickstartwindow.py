@@ -26,7 +26,7 @@ class Quickstartwindow(Tk.Toplevel):
         self.minsize(400, 400)
 
         #tkFont
-        self.customFont = tkFont.Font(family="Browallia New", size=20)
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
 
         #Create an empty frame for list the user
         self.accountlist_frame = Tk.Frame(self)
@@ -40,7 +40,7 @@ class Quickstartwindow(Tk.Toplevel):
         self.listcreateduser(self.accountlist_frame)
 
         #Create Button for adding new user
-        Tk.Button(self, text="เพิ่มผู้ใช้ใหม่", bd=4, width=30, height=1, command=self.summon_addnewuserwindow, font=self.customFont).pack(side="bottom", fill="x")
+        Tk.Button(self, text="เพิ่มผู้ใช้ใหม่", bd=4, width=13, height=1, command=self.summon_addnewuserwindow, font=self.customFont).pack(pady=12, side="bottom")
 
         self.update()
         w_req, h_req = self.winfo_width(), self.winfo_height()
