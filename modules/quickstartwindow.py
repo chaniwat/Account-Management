@@ -27,6 +27,10 @@ class Quickstartwindow(Tk.Toplevel):
 
         #tkFont
         self.customFont = tkFont.Font(family="Browallia New", size=15)
+        self.customFonthead = tkFont.Font(family="Browallia New", size=20, weight="bold")
+
+        #Label
+        Tk.Label(self, text="รายชื่อผู้ใช้", font=self.customFonthead).pack(pady=10)
 
         #Create an empty frame for list the user
         self.accountlist_frame = Tk.Frame(self)
@@ -71,22 +75,25 @@ class Quickstartwindow(Tk.Toplevel):
         #Filter only .db files
         files = filter(lambda x: x[-1:-4:-1][::-1] == FILE_EXTENSION_DATABASE, files)
 
-        #Sort file by modify date
-        files_key_by_mod_date = list()
+        if len(files) > 0:
+            #Sort file by modify date
+            files_key_by_mod_date = list()
 
-        for file in files:
-            file_mod_datetime = tuple(time.ctime(os.stat(os.getcwd()+"\\"+file).st_mtime).split())
-            file_mod_date = (int(file_mod_datetime[2]), MONTH_3_STR_TO_INT[file_mod_datetime[1].upper()], int(file_mod_datetime[4]))
-            files_key_by_mod_date.append((file_mod_date, file))
+            for file in files:
+                file_mod_datetime = tuple(time.ctime(os.stat(os.getcwd()+"\\"+file).st_mtime).split())
+                file_mod_date = (int(file_mod_datetime[2]), MONTH_3_STR_TO_INT[file_mod_datetime[1].upper()], int(file_mod_datetime[4]))
+                files_key_by_mod_date.append((file_mod_date, file))
 
-        files_key_by_mod_date.sort(reverse=True)
-        files = list()
-        for file_mod_date in files_key_by_mod_date:
-            files.append(file_mod_date[1])
+            files_key_by_mod_date.sort(reverse=True)
+            files = list()
+            for file_mod_date in files_key_by_mod_date:
+                files.append(file_mod_date[1])
 
-        #Create an user widget for every each file that contain in database directory
-        for row, file in zip(xrange(len(files)), files):
-            self.addwidget_singleuser(parent, file)
+            #Create an user widget for every each file that contain in database directory
+            for row, file in zip(xrange(len(files)), files):
+                self.addwidget_singleuser(parent, file)
+        else:
+            Tk.Label(self, text="ยังไม่มีผู้ใช้งาน โปรดเพิ่มผู้ใช้งาน", font=self.customFont).pack(fill="both", expand=1)
 
     def addwidget_singleuser(self, parent, filename):
         """Add user widget"""
