@@ -5,6 +5,7 @@ import Tkinter as Tk
 import tkFont
 import database as db
 import md5, time
+import mainwindow
 
 class Addnewrecordwindow(Tk.Toplevel):
     def __init__(self, main, parent, accounttype):
@@ -71,7 +72,11 @@ class Addnewrecordwindow(Tk.Toplevel):
         Tk.Frame(self.input_form, height=15).pack()
 
         #Create Button to submit the from
-        Tk.Button(self.input_form, width=30, height=1, bd=4, text="เพิ่มรายการใหม่", command=self.createnewrecord, font=self.customFont).pack(fill="x")
+        confirmbtn = Tk.Button(self.input_form, width=30, height=1, bd=4, text="เพิ่มรายการใหม่", command=self.createnewrecord, font=self.customFont)
+        confirmbtn.pack(fill="x")
+        confirmbtn.bind("<Return>", self.createnewrecord)
+
+        self.description.focus_set()
 
         self.update()
         w_req, h_req = self.winfo_width(), self.winfo_height()
@@ -86,8 +91,19 @@ class Addnewrecordwindow(Tk.Toplevel):
         #Collect data
         data = dict()
         data["type"] = self.recordtypelist[self.currenttypeselect.get()]
-        data["description"] = self.description.get()
-        data["amtmoney"] = self.money.get()
+        if self.description.get() == "":
+            self.wait_window(mainwindow.Alertdialog(self, text="กรุณาใส่ทำอธิบาย"))
+            return False
+        else:
+            data["description"] = self.description.get()
+        if self.money.get() == "":
+            self.wait_window(mainwindow.Alertdialog(self, text="กรุณาใส่เงิน"))
+            return False
+        elif not self.money.get().isdigit():
+            self.wait_window(mainwindow.Alertdialog(self, text="กรุณาใส่เงินเป็นตัวเลข"))
+            return False
+        else:
+            data["amtmoney"] = self.money.get()
 
         self.result = self.main.database.addrecordtocurrentaccount(data)
 

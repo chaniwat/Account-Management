@@ -1,0 +1,14 @@
+DATABASE RESULT TYPE
+----------------------------------
+ERROR
+----------------------------------
+DB_ERR_DIRECTORY_NOT_FOUND - database directory not found
+DB_ERR_FILE_NOT_FOUND - database file not found
+DB_ERR_FILE_EXIST - database file already exist
+DB_ERR_NOT_CONNECT - database not connect
+----------------------------------
+SUCCESS
+----------------------------------
+DB_SUCCESS_CREATE - create database file success
+DB_SUCCESS_DELETE - delete database file success
+DB_SUCCESS_CLOSECONNECT - close connection to database success

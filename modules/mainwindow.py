@@ -530,6 +530,8 @@ class totalaccountwindow(Tk.Toplevel):
 
         account_list = self.main.database.get_currentuserallaccount()
 
+        translate_dict = {u"ACC_WALLET":u"กระเป๋าเงิน", u"ACC_BANK":u"บัญชีธนาคาร", u"ACC_POT":u"กระปุกเงิน"}
+
         moneytotal = 0
 
         for account in account_list:
@@ -538,7 +540,7 @@ class totalaccountwindow(Tk.Toplevel):
             frameleft = Tk.Frame(frametemp)
             frameleft.pack(side="left")
             Tk.Label(frameleft, anchor="w", text=u"ชื่อบัญชี : "+account[0], width=50).pack(fill="x")
-            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+account[1]).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+translate_dict[account[1]]).pack(fill="x")
             Tk.Label(frameleft, anchor="w", text=u"วันสุดท้ายที่อัพเดท : "+account[2]).pack(fill="x")
             Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3])).pack(fill="x")
             frameright = Tk.Frame(frametemp)
