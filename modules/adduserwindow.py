@@ -125,7 +125,7 @@ class Addnewuserwindow(Tk.Toplevel):
                     self.wait_window(window_Alertdialog(self, text="กรุณากรอกเดือนเกิดเป็นตัวเลข"))
                     self.textboxs[key+"-m"].focus_set()
                     return False
-                elif self.textboxs[key+"-y"].get() == "" or len(self.textboxs[key+"-y"].get()) < 2:
+                elif self.textboxs[key+"-y"].get() == "" or len(self.textboxs[key+"-y"].get()) < 4:
                     self.wait_window(window_Alertdialog(self, text="กรุณากรอกปีเกิด"))
                     self.textboxs[key+"-y"].focus_set()
                     return False
