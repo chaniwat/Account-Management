@@ -32,8 +32,6 @@ MONTH_3_STR_TO_INT = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6
 #Main window class
 class Mainwindow:
     def __init__(self, root, filename):
-        print filename
-
         #Keep filename
         self.filename = filename
 
