@@ -109,16 +109,28 @@ class Addnewuserwindow(Tk.Toplevel):
             if key == "has_pwd":
                 data[key] = ["False", "True"][self.pwdstate.get()]
             elif key == "birthday":
-                if self.textboxs[key+"-d"].get() == "":
-                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกวันเกิด"))
+                if self.textboxs[key+"-d"].get() == "" or len(self.textboxs[key+"-d"].get()) < 2:
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกวันเกิดให้ครบ"))
                     self.textboxs[key+"-d"].focus_set()
                     return False
-                elif self.textboxs[key+"-m"].get() == "":
+                elif not self.textboxs[key+"-d"].get().isdigit():
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกวันเกิดเป็นตัวเลข"))
+                    self.textboxs[key+"-d"].focus_set()
+                    return False
+                elif self.textboxs[key+"-m"].get() == "" or len(self.textboxs[key+"-m"].get()) < 2:
                     self.wait_window(window_Alertdialog(self, text="กรุณากรอกเดือนเกิด"))
                     self.textboxs[key+"-m"].focus_set()
                     return False
-                elif self.textboxs[key+"-y"].get() == "":
+                elif not self.textboxs[key+"-m"].get().isdigit():
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกเดือนเกิดเป็นตัวเลข"))
+                    self.textboxs[key+"-m"].focus_set()
+                    return False
+                elif self.textboxs[key+"-y"].get() == "" or len(self.textboxs[key+"-y"].get()) < 4:
                     self.wait_window(window_Alertdialog(self, text="กรุณากรอกปีเกิด"))
+                    self.textboxs[key+"-y"].focus_set()
+                    return False
+                elif not self.textboxs[key+"-y"].get().isdigit():
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกปีเกิดเป็นตัวเลข"))
                     self.textboxs[key+"-y"].focus_set()
                     return False
                 data[key] = self.textboxs[key+"-d"].get()+"-"+self.textboxs[key+"-m"].get()+"-"+self.textboxs[key+"-y"].get()

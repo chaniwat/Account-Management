@@ -49,7 +49,7 @@ class Mainwindow:
         self.root = root
 
         #set minsize
-        self.root.minsize(1100, 600)
+        self.root.minsize(1150, 600)
         #Set title
         self.root.title("Account-Management")
 
