@@ -226,7 +226,7 @@ class Main_mainsection(Tk.Frame):
         #Temporary variable to save the reference to mainwindow
         self.main = main
 
-        self.customFont = tkFont.Font(family="Browallia New", size=13)
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
 
         #Create frame
         Tk.Frame.__init__(self, self.parent)
@@ -240,7 +240,7 @@ class Main_mainsection(Tk.Frame):
         self.rightsection.pack(side="left", fill="both", expand=1)
 
         #Create Button for adding new record
-        Tk.Button(self.rightsection, text="เพิ่มรายการ", height=3, command=self.main.newrecord, font=self.customFont).pack(side="top", fill="x")
+        #Tk.Button(self.rightsection, text="เพิ่มรายการ", height=3, command=self.main.newrecord, font=self.customFont).pack(side="top", fill="x")
 
         #rightmain section
         self.rightmain_section_frame = VerticalScrolledFrame(self.rightsection, relief="groove", bd=3)
@@ -303,6 +303,8 @@ class Main_accountsection(Tk.Frame):
 
         #Create button to delete the current select account
         Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.main.deletethisaccount, font=self.customFont).pack(padx=5, side="left")
+
+        Tk.Button(self, text="เพิ่มรายการ", width=14, height=2, command=self.main.newrecord, font=self.customFont).pack(side="right")
 
     def changedatareport(self, account_id):
         """Change data to report to select account"""

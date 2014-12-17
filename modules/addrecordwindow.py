@@ -23,7 +23,7 @@ class Addnewrecordwindow(Tk.Toplevel):
         #Set title
         self.title("Create new record")
 
-        self.customFont = tkFont.Font(family="Browallia New", size=20)
+        self.customFont = tkFont.Font(family="Browallia New", size=14)
 
         #Overlay and freeze the parent
         self.transient(self.parent)
@@ -51,13 +51,15 @@ class Addnewrecordwindow(Tk.Toplevel):
         self.currenttypeselect = Tk.StringVar(self)
         self.currenttypeselect.set(self.keysorttype[0])
 
+
         self.typeselectmenu = apply(Tk.OptionMenu, (self.input_form, self.currenttypeselect) + (tuple(self.keysorttype)))
+        self.typeselectmenu.config(font=self.customFont)
         self.typeselectmenu.pack()
         self.typeselectmenuelement = self.typeselectmenu.children["menu"]
         self.typeselectmenuelement.delete(0, 'end')
 
         for recordtype in self.keysorttype:
-            self.typeselectmenuelement.add_command(label=recordtype, command=lambda recordtype=recordtype: self.currenttypeselect.set(recordtype))
+            self.typeselectmenuelement.add_command(label=recordtype, command=lambda recordtype=recordtype: self.currenttypeselect.set(recordtype), font=self.customFont)
 
         #Create label and textbox for desciption of this record
         Tk.Label(self.input_form, text="รายละเอียดรายการ", font=self.customFont).pack()
