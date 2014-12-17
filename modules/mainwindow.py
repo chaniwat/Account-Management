@@ -627,7 +627,7 @@ class VerticalScrolledFrame(Tk.Frame):
         canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
 class Alertdialog(Tk.Toplevel):
-    def __init__(self, parent, title="alert", text="alert"):
+    def __init__(self, parent, title="alert", text="Alert!"):
         Tk.Toplevel.__init__(self, parent)
 
         #Set title
@@ -639,10 +639,23 @@ class Alertdialog(Tk.Toplevel):
         #Focus to self
         self.focus_set()
 
-        Tk.Label(self, text=text).pack()
-        confirmbtn = Tk.Button(self, text="ยืนยัน", command=self.destroy)
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=13)
+
+        Tk.Label(self, text=text, font=self.customFont).pack()
+        confirmbtn = Tk.Button(self, text="ยืนยัน", command=self.destroy, font=self.customFont)
         confirmbtn.pack()
         confirmbtn.focus_set()
         def destroyself(*arg):
             self.destroy()
         confirmbtn.bind("<Return>", destroyself)
+
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
