@@ -8,6 +8,7 @@ import os, time
 from mainwindow import FILE_EXTENSION_DATABASE, ROOT_DIRECTORY_PATH, \
                        DATABASE_DIRECTORY_PATH, MONTH_3_STR_TO_INT
 from adduserwindow import Addnewuserwindow as window_Addnewuserwindow
+from mainwindow import Alertdialog as window_Alertdialog
 
 class Quickstartwindow(Tk.Toplevel):
     def __init__(self, root):
@@ -25,7 +26,11 @@ class Quickstartwindow(Tk.Toplevel):
         self.minsize(400, 400)
 
         #tkFont
-        self.customFont = tkFont.Font(family="Browallia New", size=20)
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+        self.customFonthead = tkFont.Font(family="Browallia New", size=20, weight="bold")
+
+        #Label
+        Tk.Label(self, text="รายชื่อผู้ใช้", font=self.customFonthead).pack(pady=10)
 
         #Create an empty frame for list the user
         self.accountlist_frame = Tk.Frame(self)
@@ -39,7 +44,7 @@ class Quickstartwindow(Tk.Toplevel):
         self.listcreateduser(self.accountlist_frame)
 
         #Create Button for adding new user
-        Tk.Button(self, text="เพิ่มผู้ใช้ใหม่", bd=4, width=30, height=1, command=self.summon_addnewuserwindow, font=self.customFont).pack(side="bottom", fill="x")
+        Tk.Button(self, text="เพิ่มผู้ใช้ใหม่", bd=4, width=13, height=1, command=self.summon_addnewuserwindow, font=self.customFont).pack(pady=12, side="bottom")
 
         self.update()
         w_req, h_req = self.winfo_width(), self.winfo_height()
@@ -52,9 +57,6 @@ class Quickstartwindow(Tk.Toplevel):
 
         #Bind the "WM_DELETE_WINDOW" for detect that user was closed this window from a hypothetical menu
         self.protocol("WM_DELETE_WINDOW", self.root.exitrootprogram)
-
-    def __repr__(self):
-        return "quickstartwindow"
 
     def listcreateduser(self, parent):
         """List the user that created in database directory and add user 
@@ -73,22 +75,25 @@ class Quickstartwindow(Tk.Toplevel):
         #Filter only .db files
         files = filter(lambda x: x[-1:-4:-1][::-1] == FILE_EXTENSION_DATABASE, files)
 
-        #Sort file by modify date
-        files_key_by_mod_date = list()
+        if len(files) > 0:
+            #Sort file by modify date
+            files_key_by_mod_date = list()
 
-        for file in files:
-            file_mod_datetime = tuple(time.ctime(os.stat(os.getcwd()+"\\"+file).st_mtime).split())
-            file_mod_date = (int(file_mod_datetime[2]), MONTH_3_STR_TO_INT[file_mod_datetime[1].upper()], int(file_mod_datetime[4]))
-            files_key_by_mod_date.append((file_mod_date, file))
+            for file in files:
+                file_mod_datetime = tuple(time.ctime(os.stat(os.getcwd()+"\\"+file).st_mtime).split())
+                file_mod_date = (int(file_mod_datetime[2]), MONTH_3_STR_TO_INT[file_mod_datetime[1].upper()], int(file_mod_datetime[4]))
+                files_key_by_mod_date.append((file_mod_date, file))
 
-        files_key_by_mod_date.sort(reverse=True)
-        files = list()
-        for file_mod_date in files_key_by_mod_date:
-            files.append(file_mod_date[1])
+            files_key_by_mod_date.sort(reverse=True)
+            files = list()
+            for file_mod_date in files_key_by_mod_date:
+                files.append(file_mod_date[1])
 
-        #Create an user widget for every each file that contain in database directory
-        for row, file in zip(xrange(len(files)), files):
-            self.addwidget_singleuser(parent, file)
+            #Create an user widget for every each file that contain in database directory
+            for row, file in zip(xrange(len(files)), files):
+                self.addwidget_singleuser(parent, file)
+        else:
+            Tk.Label(self, text="ยังไม่มีผู้ใช้งาน โปรดเพิ่มผู้ใช้งาน", font=self.customFont).pack(fill="both", expand=1)
 
     def addwidget_singleuser(self, parent, filename):
         """Add user widget"""
@@ -107,7 +112,7 @@ class Quickstartwindow(Tk.Toplevel):
             Tk.Button(frame_temp_btn, text="Login", command=lambda filename=filename: self.selectuser(filename)).pack(padx=6, side="left")
             Tk.Button(frame_temp_btn, text="Delete", command=lambda filename=filename: self.deleteuser(filename)).pack(padx=6, side="left")
 
-    def selectuser(self, filename):
+    def selectuser(self, filename, flag=False):
         """Select user to work with and send filename to root for summon main window
         and destroy this window
         but if select filename has password will prompt the dialog for user to insert password
@@ -115,7 +120,7 @@ class Quickstartwindow(Tk.Toplevel):
         #Get user_info of this user
         data = db.getuserinfoaccount(filename)[1]
         #check if filename have password
-        if data["USER_HAS_PWD"] == "True":
+        if data["USER_HAS_PWD"] == "True" and not flag:
             passprompt = passwordprompt(self, data["USER_PWD"])
             self.wait_window(passprompt)
             if passprompt.result:
@@ -130,11 +135,26 @@ class Quickstartwindow(Tk.Toplevel):
         prompt = confirmdeteleuserprompt(self)
         self.wait_window(prompt)
         if prompt.result:
-            result = db.deleteaccount(filename)
-            if result[0]:
-                self.refreshthiswindow()
-            else:
-                print result[1]
+            #Get user_info of this user
+            data = db.getuserinfoaccount(filename)[1]
+            #check if filename have password
+            if data["USER_HAS_PWD"] == "True":
+                passprompt = passwordprompt(self, data["USER_PWD"])
+                self.wait_window(passprompt)
+                if passprompt.result:
+                    result = db.deleteaccount(filename)
+                    if result[0]:
+                        self.refreshthiswindow()
+                    else:
+                        print result[1]
+                else:
+                    return False
+            else:      
+                result = db.deleteaccount(filename)
+                if result[0]:
+                    self.refreshthiswindow()
+                else:
+                    print result[1]
 
     def refreshthiswindow(self):
         """Refresh this window by close and re-summon"""
@@ -144,7 +164,10 @@ class Quickstartwindow(Tk.Toplevel):
 
     def summon_addnewuserwindow(self):
         """Summon the add new user window to create new user"""
-        self.wait_window(window_Addnewuserwindow(self))
+        adduserwindow = window_Addnewuserwindow(self)
+        self.wait_window(adduserwindow)
+        if adduserwindow.result[0]:
+            self.selectuser(adduserwindow.result[1], True)
 
 class passwordprompt(Tk.Toplevel):
     def __init__(self, parent, filepwd):
@@ -176,14 +199,15 @@ class passwordprompt(Tk.Toplevel):
         Tk.Label(self, text="กรุณาใส่พาสเวริด", font=self.customFont).pack()
 
         #Create Entry
-        self.passwordbox = Tk.Entry(self)
+        self.passwordbox = Tk.Entry(self, show="*")
         self.passwordbox.pack()
+        self.passwordbox.focus_set()
 
         #Create action button
         frame_temp = Tk.Frame(self)
         frame_temp.pack()
 
-        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยืนยัน", command=lambda: self.confirmaction(None), font=self.customFont).pack(side="left")
         Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
         
         #Centered window
@@ -196,12 +220,17 @@ class passwordprompt(Tk.Toplevel):
         y = (self.winfo_screenheight() // 2) - (h // 2)
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
-    def confirmaction(self):
+        #bind enter button
+        self.passwordbox.bind("<Return>", self.confirmaction)
+
+    def confirmaction(self, event):
         if self.passwordbox.get() == self.filepwd:
             self.result = True
             self.destroy()
         else:
-            print "password not match"
+            self.wait_window(window_Alertdialog(self, text="รหัสผ่านไม่ตรงกัน"))
+            self.passwordbox.focus_set()
+            return False
 
     def cancelaction(self):
         self.result = False

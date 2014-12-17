@@ -1,0 +1,17 @@
+ACCOUNT TAG
+----------------------------------
+ACCOUNT_WALLET_NAME = wallet name in local language
+ACCOUNT_INITIATE_TEXT = first time create user
+
+ADD NEW USER ACCOUNT
+mainwindow.py -> Addnewaccountwindow class
+----------------------------------
+datakeys:
+    name,
+    surname,
+    nickname,
+    birthday,
+    has_pwd,
+    pwd,
+    createdate,
+    money

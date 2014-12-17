@@ -12,6 +12,8 @@ import tkFont
 import database as db
 import sys, os, md5, time
 from addaccountwindow import Addnewaccountwindow as window_Addnewaccountwindow
+from addrecordwindow import Addnewrecordwindow as window_Addnewrecordwindow
+import quickstartwindow as qs
 
 #Global Variable use cross the program
 #Full directory path that keep core file
@@ -30,7 +32,8 @@ MONTH_3_STR_TO_INT = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6
 #Main window class
 class Mainwindow:
     def __init__(self, root, filename):
-        print filename
+        #Keep filename
+        self.filename = filename
 
         #Connect to database file
         self.database = db.database()
@@ -44,7 +47,7 @@ class Mainwindow:
         self.root = root
 
         #set minsize
-        self.root.minsize(1100, 600)
+        self.root.minsize(1150, 600)
         #Set title
         self.root.title("Account-Management")
 
@@ -84,21 +87,81 @@ class Mainwindow:
             self.account_section.pack_forget()
             self.account_section.destroy()
             self.account_section = Main_accountsection(self, self.parentaccount_section)
+            self.refreshdata()
 
-    def closethisaccount(self):
-        print "closethisaccount"
+    def newrecord(self):
+        """summon the add new record window"""
+        newrecordwindow = window_Addnewrecordwindow(self, self.root, self.database.get_currentaccounttype())
+        self.root.wait_window(newrecordwindow)
+        if newrecordwindow.result:
+            self.refreshdata()
 
     def deletethisaccount(self):
         """summon the confirm prompt dialog"""
-        actionresult = confirmdeteleaccountprompt(self.root)
-        self.root.wait_window(actionresult)
-        if actionresult.result:
-            result = self.database.deleteaccount(self.database.get_currentaccountid())
-            if result:
-                self.refreshdata()
-                self.account_section.pack_forget()
-                self.account_section.destroy()
-                self.account_section = Main_accountsection(self, self.parentaccount_section)
+        #get account type first
+        accounttype = self.database.get_currentaccounttype()
+        if accounttype == "ACC_WALLET":
+            self.root.wait_window(Alertdialog(self.root, text="ไม่สามารถลบบัญชีกระเป๋าเงิน"))
+            return False
+        else:
+            actionresult = confirmdeteleaccountprompt(self.root)
+            self.root.wait_window(actionresult)
+            if actionresult.result:
+                result = self.database.deleteaccount(self.database.get_currentaccountid())
+                if result:
+                    self.refreshdata()
+                    self.account_section.pack_forget()
+                    self.account_section.destroy()
+                    self.account_section = Main_accountsection(self, self.parentaccount_section)
+
+    def deleterecord(self, record_id):
+        """delete the record"""
+        #get record type first
+        recordtype = self.database.get_recordtype(record_id)
+        if recordtype == "CHANGE_INITIATE":
+            self.root.wait_window(Alertdialog(self.root, text="ไม่สามารถลบรายการเริ่มต้น"))
+            return False
+        else:
+            actionresult = confirmdetelerecordprompt(self.root)
+            self.root.wait_window(actionresult)
+            if actionresult.result:
+                result = self.database.deleterecord(record_id)
+                if result:
+                    self.refreshdata()
+
+    def deletethisuser(self):
+        """prompt the confirm window and Delete the select user if user confirm (delete database file pernamently)"""
+        prompt = qs.confirmdeteleuserprompt(self.root)
+        self.root.wait_window(prompt)
+        if prompt.result:
+            #Get user_info of this user
+            data = db.getuserinfoaccount(self.filename)[1]
+            #check if filename have password
+            if data["USER_HAS_PWD"] == "True":
+                passprompt = qs.passwordprompt(self.root, data["USER_PWD"])
+                self.root.wait_window(passprompt)
+                if passprompt.result:
+                    #disconnect from current connect database
+                    self.database.closedatabase()
+                    #delete database
+                    result = db.deleteaccount(self.filename)
+                    if result[0]:
+                        #call reopen program
+                        self.root.reopenprogram()
+                    else:
+                        print result[1]
+                else:
+                    return False
+            else:      
+                #disconnect from current connect database
+                self.database.closedatabase()
+                #delete database
+                result = db.deleteaccount(self.filename)
+                if result[0]:
+                    #call reopen program
+                    self.root.reopenprogram()
+                else:
+                    print result[1]
 
 #By Section Class
 #Main Menu
@@ -118,22 +181,20 @@ class Main_menubar(Tk.Menu):
         #Add menu and submenu
         #Program menu
         self.programmenu = Tk.Menu(self, tearoff=0)
-        self.programmenu.add_command(label="เปลี่ยนผู้ใช้", command=lambda: self.swapuser(), font=self.customFont)
-        self.programmenu.add_separator()
         self.programmenu.add_command(label="ออกจากโปรแกรม", command=lambda: self.exitprogram(), font=self.customFont)
         self.add_cascade(label="โปรแกรม", menu=self.programmenu, font=self.customFont)
 
         #user menu
         self.usermenu = Tk.Menu(self, tearoff=0)
-        self.usermenu.add_command(label="สรุปเงินทั้งหมด", command=lambda: hello(), font=self.customFont)
-        self.usermenu.add_command(label="ประมาณเงินคงเหลือ", command=lambda: hello(), font=self.customFont)
+        self.usermenu.add_command(label="เปลี่ยนผู้ใช้", command=lambda: self.swapuser(), font=self.customFont)
+        self.usermenu.add_command(label="ลบผู้ใช้นี้", command=lambda: self.main.deletethisuser(), font=self.customFont)
         self.add_cascade(label="ผู้ใช้", menu=self.usermenu, font=self.customFont)
 
         #account menu
         self.accountmenu = Tk.Menu(self, tearoff=0)
+        self.accountmenu.add_command(label="ดูบัญชีทั้งหมด", command=lambda: self.summon_accountoverall(), font=self.customFont)
+        self.accountmenu.add_separator()
         self.accountmenu.add_command(label="เพิ่มบัญชี" ,command=lambda: self.main.newaccount(), font=self.customFont)
-        self.accountmenu.add_command(label="ปิดบัญชี" ,command=lambda: hello(), font=self.customFont)
-        self.accountmenu.add_command(label="ลบบัญชี" ,command=lambda: hello(), font=self.customFont)
         self.add_cascade(label="บัญชี", menu=self.accountmenu, font=self.customFont)
 
         #Set parent to use this menubar
@@ -146,6 +207,11 @@ class Main_menubar(Tk.Menu):
         self.main.database.closedatabase()
         #call reopen program
         self.main.root.reopenprogram()
+
+    def summon_accountoverall(self):
+        """summon the overall account window"""
+        overallwindow = totalaccountwindow(self.main, self.main.root)
+        self.main.root.wait_window(overallwindow)
 
     def exitprogram(self):
         """exit the program"""
@@ -160,8 +226,7 @@ class Main_mainsection(Tk.Frame):
         #Temporary variable to save the reference to mainwindow
         self.main = main
 
-        #Get current account type
-        print self.main.database.get_currentaccounttype()
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
 
         #Create frame
         Tk.Frame.__init__(self, self.parent)
@@ -171,17 +236,20 @@ class Main_mainsection(Tk.Frame):
         self.leftmain_section_frame = Tk.Frame(self)
         self.leftmain_section_frame.pack(side="left", fill="y")
 
-        #rightmain section
-        self.rightmain_section_frame = VerticalScrolledFrame(self, relief="groove", bd=3)
-        self.rightmain_section_frame.pack(side="left", fill="both", expand=1)
+        self.rightsection = Tk.Frame(self)
+        self.rightsection.pack(side="left", fill="both", expand=1)
 
-        #viewtype section
-        self.viewtype_section = Main_viewtypesection(self.main, self.leftmain_section_frame)
+        #Create Button for adding new record
+        #Tk.Button(self.rightsection, text="เพิ่มรายการ", height=3, command=self.main.newrecord, font=self.customFont).pack(side="top", fill="x")
+
+        #rightmain section
+        self.rightmain_section_frame = VerticalScrolledFrame(self.rightsection, relief="groove", bd=3)
+        self.rightmain_section_frame.pack(side="bottom", fill="both", expand=1)
 
         #account property section
         self.account_property_section = Main_accountpropertysection(self.main, self.leftmain_section_frame)
 
-        # create a frame inside the canvas which will be scrolled with it
+        #create a frame inside the canvas which will be scrolled with it
         self.datareport_section = Main_datareportsection(self.main, self.rightmain_section_frame.interior)
 
 #Account section
@@ -210,21 +278,21 @@ class Main_accountsection(Tk.Frame):
         #Create Label for account selection
         Tk.Label(self, text="เลือกบัญชี", font=self.customFont).pack(side="left", pady=25)
 
-        #Create selection for current account to show
-        accounts = list()
-        #Unload variable
-        for account in self.accountlist:
-            accounts.append(account[1])
         #Create selection menu
         self.currentaccountselect = Tk.StringVar(self)
-        self.currentaccountselect.set(self.accountlist[self.main.database.get_currentaccountid()-1][1])
+        self.currentaccountselect.set(self.main.database.get_currentaccountname())
 
-        self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect) + tuple(accounts))
-        self.accountselectmenu.config(width=25)
+        self.accountselectmenu = apply(Tk.OptionMenu, (self, self.currentaccountselect, ''))
+        self.accountselectmenu.config(width=25, font=self.customFont)
         self.accountselectmenu.pack(padx=10, pady=25, side="left")
+        self.accountselectmenuelement = self.accountselectmenu.children["menu"]
+        self.accountselectmenuelement.delete(0, 'end')
 
-        #Create button to view the current select account
-        Tk.Button(self, text="ดูบัญชี", command=self.changedatareport, font=self.customFont).pack(padx=5, pady=25, side="left")
+        for account in self.accountlist:
+            self.accountselectmenuelement.add_command(label=account[1], command=lambda account_id=account[0]: self.changedatareport(account_id), font=self.customFont)
+
+        #Create button to edit the current select account
+        Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount, font=self.customFont).pack(padx=5, side="left")
 
         #Create frame to make a separator
         Tk.Frame(self, width=2, bd=1, relief="sunken").pack(side="left", fill="y", padx=10, pady=10)
@@ -233,27 +301,19 @@ class Main_accountsection(Tk.Frame):
         self.accountnamelabel = Tk.Label(self, text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname(), font=self.customFont)
         self.accountnamelabel.pack(side="left", pady=25)
 
-        #Create button to edit the current select account
-        Tk.Button(self, text="เพิ่มบัญชีใหม่", command=self.main.newaccount, font=self.customFont).pack(padx=5, side="left")
-
-        #Create button to close the current select account
-        Tk.Button(self, text="ปิดบัญชีปัจจุบัน", command=self.main.closethisaccount, font=self.customFont).pack(padx=5, side="left")
-
         #Create button to delete the current select account
         Tk.Button(self, text="ลบบัญชีปัจจุบัน", command=self.main.deletethisaccount, font=self.customFont).pack(padx=5, side="left")
 
-    def changedatareport(self):
-        """Change data to report to select account"""
-        self.customFont = tkFont.Font(family="Browallia New", size=20)
+        Tk.Button(self, text="เพิ่มรายการ", width=14, height=2, command=self.main.newrecord, font=self.customFont).pack(side="right")
 
-        #Find account id
-        for account in self.accountlist:
-            if self.currentaccountselect.get() == account[1]:
-                currentaccountselect_id = account[0]
-                break
+    def changedatareport(self, account_id):
+        """Change data to report to select account"""
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
         #Set and refrest data report frame
-        self.main.database.set_currentaccountid(currentaccountselect_id)
+        self.main.database.set_currentaccountid(account_id)
         self.accountnamelabel.config(text=u"บัญชีปัจจุบัน: "+self.main.database.get_currentaccountname(), font=self.customFont)
+        self.currentaccountselect.set(self.main.database.get_currentaccountname())
         self.main.refreshdata()
 
 #Account property section
@@ -266,21 +326,49 @@ class Main_accountpropertysection(Tk.Frame):
         self.main = main
 
         #Create frame
-        Tk.Frame.__init__(self, self.parent, width=250, height=200, bg="red")
-        self.pack(fill="x")
+        Tk.Frame.__init__(self, self.parent, width=250, height=200, relief="groove", bd=2)
+        self.pack(fill="both", expand=1)
+        self.pack_propagate(0)
 
-#View type section
-class Main_viewtypesection(Tk.Frame):
-    def __init__(self, main, parent):
-        #Temporary variable to save the reference to parent
-        self.parent = parent
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
 
-        #Temporary variable to save the reference to mainwindow
-        self.main = main
+        #fetch user info data
+        userinfodata = self.main.database.get_currentuserinfo()[1]
+        #Create key dict translate to local language
+        keys_sort = [u"USER_NAME", u"USER_SURNAME", u"USER_NICKNAME", u"USER_BIRTHDAY", u"USER_CREATEDATE", u"USER_LASTEDITDATE"]
+        translate_dict = {u"USER_NAME":u"ชื่อ", u"USER_SURNAME":u"นามสกุล", u"USER_NICKNAME":u"ชื่อเล่น", u"USER_BIRTHDAY":u"วันเกิด", u"USER_CREATEDATE":u"ผู้ใช้สร้างวันที่", u"USER_LASTEDITDATE":u"อัพเดทล่าสุด"}
 
-        #Create frame
-        Tk.Frame.__init__(self, self.parent, width=250, height=80, bg="orange")
-        self.pack(fill="x")
+        #Label for title
+        Tk.Label(self, text="ข้อมูลผู้ใช้", font=self.customFont).pack(pady=10)
+
+        for key in keys_sort:
+            tempframe = Tk.Frame(self)
+            tempframe.pack(fill="x")
+
+            #Create label
+            Tk.Label(tempframe, text=translate_dict[key]+u" : "+userinfodata[key], font=self.customFont).pack(side="left")
+
+        separator = Tk.Frame(self, height=2, bd=1, relief="sunken")
+        separator.pack(fill="x", padx=5, pady=10)
+
+        #Label for title
+        Tk.Label(self, text="ข้อมูลบัญชีปัจจุบัน", font=self.customFont).pack(pady=8)
+
+        #fetch current account info
+        accountinfodata = self.main.database.get_currentaccountinfo()
+        keys_sort = [u"ชื่อบัญชี", u"ประเภทบัญชี", u"อัพเดทล่าสุด", u"จำนวนเงินปัจจุบัน"]
+        translate_dict = {u"ACC_WALLET":u"กระเป๋าเงิน", u"ACC_BANK":u"บัญชีธนาคาร", u"ACC_POT":u"กระปุกเงิน"}
+        
+        for key, data in zip(keys_sort, accountinfodata):
+            tempframe = Tk.Frame(self)
+            tempframe.pack(fill="x")
+
+            #Create label
+            if key == u"ประเภทบัญชี":
+                Tk.Label(tempframe, text=key+u" : %s" % translate_dict[data], font=self.customFont).pack(side="left")
+            else:
+                Tk.Label(tempframe, text=key+u" : %s" % data, font=self.customFont).pack(side="left")
 
 #Data report table section + support class
 class Main_datareportsection:
@@ -294,6 +382,11 @@ class Main_datareportsection:
         #tkFont
         self.customFont = tkFont.Font(family="Browallia New", size=15)
 
+        #Translate
+        translate_dict_record = {u"CHANGE_WALLET_INCOME":u"รายได้/เงินที่ได้", u"CHANGE_WALLET_EAT":u"อาหาร", u"CHANGE_WALLET_BUY":u"ซื้อของ", u"CHANGE_WALLET_ENTERTAINMENT":u"ดูหนัง", u"CHANGE_WALLET_TRAVEL":u"ท่องเที่ยว/เดินทาง", u"CHANGE_WALLET_BILL":u"จ่ายบิล/อื่นๆ",
+                                u"CHANGE_BANK_DEPOSIT":u"ฝากเงิน", u"CHANGE_BANK_WITHDRAW":u"ถอนเงิน", u"CHANGE_BANK_TRANSFER_IN":u"โอน(รับ)", u"CHANGE_BANK_TRANSFER_OUT":u"โอน(จ่าย)", u"CHANGE_BANK_PAY":u"จ่ายเงิน",
+                                u"CHANGE_POT_DEPOSIT":u"ออมเงิน", u"CHANGE_POT_WITHDRAW":u"ถอนเงิน", "CHANGE_INITIATE":u"เริ่มต้น"}
+
         frametemp = Tk.Frame(self.parent)
         frametemp.pack(fill="x")
         Tk.Label(frametemp, text="วันที่", width=10, relief="ridge", bg="white", font=self.customFont).pack(side="left")
@@ -306,13 +399,10 @@ class Main_datareportsection:
             frametemp = Tk.Frame(self.parent)
             frametemp.pack(fill="x")         
             Tk.Label(frametemp, text=data[0], width=10, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
-            Tk.Label(frametemp, text=data[1], width=25, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
+            Tk.Label(frametemp, text=translate_dict_record[data[1]], width=25, relief="ridge", bg="white", font=self.customFont).pack(side="left", fill="both")
             Tk.Label(frametemp, wraplength=350, justify="left", text=data[2], relief="ridge", bg="white", font=self.customFont).pack(expand=1, side="left", fill="both")
-            Tk.Button(frametemp, width=8, text="ลบ", command=lambda change_id=data[4]: self.printa(change_id), font=self.customFont).pack(side="right", ipadx=1)
+            Tk.Button(frametemp, width=8, text="ลบ", command=lambda change_id=data[4]: self.main.deleterecord(change_id), font=self.customFont).pack(side="right", ipadx=1)
             Tk.Label(frametemp, width=13, text=data[3], relief="ridge", bg="white", font=self.customFont).pack(side="right", fill="both")
-
-    def printa(self, text):
-        print text
 
 #Dedicated window class
 class confirmdeteleaccountprompt(Tk.Toplevel):
@@ -367,6 +457,122 @@ class confirmdeteleaccountprompt(Tk.Toplevel):
         self.result = False
         self.destroy()
 
+class confirmdetelerecordprompt(Tk.Toplevel):
+    def __init__(self, parent):
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #Pre-defined result for none action
+        self.result = False
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, parent)
+        #Set title
+        self.title("Confirm")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Window size
+        self.minsize(200,100)
+        #Focus to self
+        self.focus_set()
+
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
+        #Create Label
+        Tk.Label(self, text="ต้องการลบรายการนี้หรือไม่?", font=self.customFont).pack()
+
+        #Create action button
+        frame_temp = Tk.Frame(self)
+        frame_temp.pack()
+
+        Tk.Button(frame_temp, text="ยืนยัน", command=self.confirmaction, font=self.customFont).pack(side="left")
+        Tk.Button(frame_temp, text="ยกเลิก", command=self.cancelaction, font=self.customFont).pack(side="left")
+
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height(),
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
+
+    def confirmaction(self):
+        self.result = True
+        self.destroy()
+
+    def cancelaction(self):
+        self.result = False
+        self.destroy()
+
+class totalaccountwindow(Tk.Toplevel):
+    def __init__(self, main, parent):
+        #Temporary variable to save the reference to main
+        self.main = main
+
+        #Temporary variable to save the reference to parent
+        self.parent = parent
+
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
+        #Create new window that is the child of parent
+        Tk.Toplevel.__init__(self, self.parent)
+        #Set title
+        self.title("Account Overview")
+
+        #Overlay and freeze the parent
+        self.transient(self.parent)
+        self.grab_set()
+        #Focus to self
+        self.focus_set()
+
+        account_list = self.main.database.get_currentuserallaccount()
+
+        translate_dict = {u"ACC_WALLET":u"กระเป๋าเงิน", u"ACC_BANK":u"บัญชีธนาคาร", u"ACC_POT":u"กระปุกเงิน"}
+
+        moneytotal = 0
+
+        for account in account_list:
+            frametemp = Tk.Frame(self, relief="ridge", bd=2)
+            frametemp.pack(fill="both")
+            frameleft = Tk.Frame(frametemp)
+            frameleft.pack(side="left")
+            Tk.Label(frameleft, anchor="w", text=u"ชื่อบัญชี : "+account[0], width=50, font=self.customFont).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"ประเภทบัญชี : "+translate_dict[account[1]], font=self.customFont).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"วันสุดท้ายที่อัพเดท : "+account[2], font=self.customFont).pack(fill="x")
+            Tk.Label(frameleft, anchor="w", text=u"จำนวนเงิยในบัญชี : "+str(account[3]), font=self.customFont).pack(fill="x")
+            frameright = Tk.Frame(frametemp)
+            frameright.pack(side="right", fill="y")
+            Tk.Button(frameright, text="เปิดบัญชี", width=8, height=1, command=lambda account_id=account[4]: self.changeaccount(account_id), font=self.customFont).pack(padx=12, pady=12)
+            moneytotal += account[3]
+
+        frametemp = Tk.Frame(self, relief="ridge", bd=2)
+        frametemp.pack(fill="both")
+        Tk.Label(frametemp, text=u"เงินรวมทั้งหมด : "+str(moneytotal), font=self.customFont).pack(padx=8, pady=8)
+
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+
+    def changeaccount(self, account_id):
+        """change account to target id and close self window"""
+        self.main.database.set_currentaccountid(account_id)
+        self.main.account_section.pack_forget()
+        self.main.account_section.destroy()
+        self.main.account_section = Main_accountsection(self.main, self.main.parentaccount_section)
+        self.main.refreshdata()
+        self.destroy()
+
 #VerticalScrolledFrame
 class VerticalScrolledFrame(Tk.Frame):
     """A pure Tkinter scrollable frame that actually works!
@@ -413,3 +619,43 @@ class VerticalScrolledFrame(Tk.Frame):
                 # update the inner frame's width to fill the canvas
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         canvas.bind('<Configure>', _configure_canvas)
+
+        def _on_mousewheel(event):
+            canvas.yview_scroll(-1*(event.delta/120), "units")
+
+        #Bind mousewheel to scroll
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+class Alertdialog(Tk.Toplevel):
+    def __init__(self, parent, title="alert", text="Alert!"):
+        Tk.Toplevel.__init__(self, parent)
+
+        #Set title
+        self.title(title)
+
+        #Overlay and freeze the parent
+        self.transient(parent)
+        self.grab_set()
+        #Focus to self
+        self.focus_set()
+
+        #tkFont
+        self.customFont = tkFont.Font(family="Browallia New", size=15)
+
+        Tk.Label(self, text=text, font=self.customFont).pack()
+        confirmbtn = Tk.Button(self, text="ยืนยัน", command=self.destroy, font=self.customFont)
+        confirmbtn.pack(pady=13)
+        confirmbtn.focus_set()
+        def destroyself(*arg):
+            self.destroy()
+        confirmbtn.bind("<Return>", destroyself)
+
+        self.update()
+        w_req, h_req = self.winfo_width(), self.winfo_height()
+        w_form = self.winfo_rootx() - self.winfo_x()
+        w = w_req + w_form*2
+        h = h_req + (self.winfo_rooty() - self.winfo_y()) + w_form
+        x = ((self.winfo_screenwidth() // 2) - (w // 2))
+        y = ((self.winfo_screenheight() // 2) - (h // 2))
+        self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
+

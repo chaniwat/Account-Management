@@ -1,2 +1,4 @@
 *.pyc
 test.py
+test2.py
+*.db

@@ -5,6 +5,8 @@ import Tkinter as Tk
 import tkFont
 import database as db
 import md5, time
+from mainwindow import Alertdialog as window_Alertdialog
+from validatingentry import MaxLengthEntry
 
 class Addnewuserwindow(Tk.Toplevel):
     def __init__(self, parent):
@@ -18,11 +20,14 @@ class Addnewuserwindow(Tk.Toplevel):
 
         self.customFont = tkFont.Font(family="Browallia New", size=20)
 
+        #keep result for none action
+        self.result = False, None
+
         #Overlay and freeze the parent
         self.transient(self.parent)
         self.grab_set()
         #Prevent user to resize this window
-        self.resizable(0, 0)
+        self.minsize(400,80)
         #Focus to self
         self.focus_set()
 
@@ -33,7 +38,8 @@ class Addnewuserwindow(Tk.Toplevel):
         self.textboxs = dict()
         #Data key
         self.datakeys = ["name", "surname", "nickname", "birthday", "has_pwd", "pwd", "initmoney"]
-        self.datakeys_label = ["ชื่อ", "นามสกุล", "ชื่อเล่น", "วันเกิด (DD-MM-YYYY | ปี ค.ศ.)", "ตั้งรหัสผ่านหรือไม่", "รหัสผ่าน", "เงินปัจจุบัน"]
+        self.datakeys_label = ["ชื่อ", "นามสกุล", "ชื่อเล่น", "วันเกิด (DD-MM-YYYY | ปี ค.ศ.)", "ตั้งรหัสผ่านหรือไม่", "รหัสผ่าน", "เงินปัจจุบัน (เลขจำนวนเต็ม)"]
+        self.datakeys_error = {"name":"กรุณากรอกชื่อ", "surname":"กรุณากรอกนามสกุล", "nickname":"กรุณากรอกชื่อเล่น", "initmoney":"กรุณากรอกเงินเริ่มต้น"}
 
         #Create label and entry to receive the user input for create new user
         for datakey, label in zip(self.datakeys, self.datakeys_label):
@@ -48,30 +54,43 @@ class Addnewuserwindow(Tk.Toplevel):
                 self.pwdstate = Tk.IntVar()
                 self.textboxs[datakey] = Tk.Checkbutton(frame_temp, text="มี", variable=self.pwdstate, command=self.togglepasswordtextbox, font=self.customFont)
                 self.textboxs[datakey].pack()
+                #Bind return event
+                self.textboxs[datakey].bind("<Return>", self.createnewuser)
             elif datakey == "birthday":
                 birthframe_temp = Tk.Frame(frame_temp)
                 birthframe_temp.pack()
-                self.textboxs[datakey+"-d"] = Tk.Entry(birthframe_temp, width=5)
+                self.textboxs[datakey+"-d"] = MaxLengthEntry(birthframe_temp, width=5, maxlength=2)
                 self.textboxs[datakey+"-d"].pack(side="left")
                 Tk.Label(birthframe_temp, text="-", font=self.customFont).pack(side="left")
-                self.textboxs[datakey+"-m"] = Tk.Entry(birthframe_temp, width=5)
+                self.textboxs[datakey+"-m"] = MaxLengthEntry(birthframe_temp, width=5, maxlength=2)
                 self.textboxs[datakey+"-m"].pack(side="left")
                 Tk.Label(birthframe_temp, text="-", font=self.customFont).pack(side="left")
-                self.textboxs[datakey+"-y"] = Tk.Entry(birthframe_temp, width=5)
+                self.textboxs[datakey+"-y"] = MaxLengthEntry(birthframe_temp, width=5, maxlength=4)
                 self.textboxs[datakey+"-y"].pack(side="left")
+                #Bind return event
+                self.textboxs[datakey+"-d"].bind("<Return>", self.createnewuser)
+                self.textboxs[datakey+"-m"].bind("<Return>", self.createnewuser)
+                self.textboxs[datakey+"-y"].bind("<Return>", self.createnewuser)
             else:
                 #Create entry and set variable to reference to this new entry that created
                 self.textboxs[datakey] = Tk.Entry(frame_temp)
                 self.textboxs[datakey].pack()
                 #if datakey is pwd, let it disabled first
                 if datakey == "pwd":
-                    self.textboxs["pwd"].config(state="disabled")
+                    self.textboxs["pwd"].config(state="disabled", show="*")
+                #Bind return event
+                self.textboxs[datakey].bind("<Return>", self.createnewuser)
+
+        #Set focus
+        self.textboxs["name"].focus_set()
 
         #Create empty frame to create some space
         Tk.Frame(self.input_form, height=15).pack()
 
         #Create Button to submit the from
-        Tk.Button(self.input_form, width=30, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=self.createnewuser, font=self.customFont).pack(fill="x")
+        confirmbtn = Tk.Button(self.input_form, width=15, height=1, bd=4, text="สร้างผู้ใช้ใหม่", command=lambda: self.createnewuser(None), font=self.customFont)
+        confirmbtn.pack(pady=13)
+        confirmbtn.bind("<Return>", self.createnewuser)
 
         self.update()
         w_req, h_req = self.winfo_width(), self.winfo_height()
@@ -82,7 +101,7 @@ class Addnewuserwindow(Tk.Toplevel):
         y = ((self.winfo_screenheight() // 2) - (h // 2))
         self.geometry('{0}x{1}+{2}+{3}'.format(w_req, h_req, x, y))
 
-    def createnewuser(self):
+    def createnewuser(self, event):
         #Get all data in textbox (entry widget) into dict
         data = dict()
         for key in self.datakeys:
@@ -90,29 +109,63 @@ class Addnewuserwindow(Tk.Toplevel):
             if key == "has_pwd":
                 data[key] = ["False", "True"][self.pwdstate.get()]
             elif key == "birthday":
+                if self.textboxs[key+"-d"].get() == "" or len(self.textboxs[key+"-d"].get()) < 2:
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกวันเกิดให้ครบ"))
+                    self.textboxs[key+"-d"].focus_set()
+                    return False
+                elif not self.textboxs[key+"-d"].get().isdigit():
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกวันเกิดเป็นตัวเลข"))
+                    self.textboxs[key+"-d"].focus_set()
+                    return False
+                elif self.textboxs[key+"-m"].get() == "" or len(self.textboxs[key+"-m"].get()) < 2:
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกเดือนเกิด"))
+                    self.textboxs[key+"-m"].focus_set()
+                    return False
+                elif not self.textboxs[key+"-m"].get().isdigit():
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกเดือนเกิดเป็นตัวเลข"))
+                    self.textboxs[key+"-m"].focus_set()
+                    return False
+                elif self.textboxs[key+"-y"].get() == "" or len(self.textboxs[key+"-y"].get()) < 4:
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกปีเกิด"))
+                    self.textboxs[key+"-y"].focus_set()
+                    return False
+                elif not self.textboxs[key+"-y"].get().isdigit():
+                    self.wait_window(window_Alertdialog(self, text="กรุณากรอกปีเกิดเป็นตัวเลข"))
+                    self.textboxs[key+"-y"].focus_set()
+                    return False
                 data[key] = self.textboxs[key+"-d"].get()+"-"+self.textboxs[key+"-m"].get()+"-"+self.textboxs[key+"-y"].get()
             else:
                 #If key is pwd, insert data depend on its state
                 if key == "pwd":
                     if self.pwdstate.get():
-                        data[key] = self.textboxs[key].get()
+                        if self.textboxs[key].get() == "":
+                            data[key] = "None"
+                        else:
+                            data[key] = self.textboxs[key].get()
                     else:
                         data[key] = "None"
                 else:
+                    if self.textboxs[key].get() == "":
+                        self.wait_window(window_Alertdialog(self, text=self.datakeys_error[key]))
+                        self.textboxs[key].focus_set()
+                        return False
+                    elif key == "initmoney" and not self.textboxs[key].get().isdigit():
+                        self.wait_window(window_Alertdialog(self, text="เงินใส่เป็นตัวเลขเท่านั้น"))
+                        self.textboxs[key].focus_set()
+                        return False
                     data[key] = self.textboxs[key].get()
         #Get current date and insert into data
         data["createdate"] = time.strftime("%d-%m-%Y")
         #Sent and receive the result to database to create new user
         result = db.createnewaccount(data)
         if result[0]:
-            #if parent is quick start window, simply add new user widget to quick start window
-            if repr(self.parent) == "quickstartwindow":
-                #Refresh the quick start window
-                self.parent.refreshthiswindow()
             #Close this window
             self.destroy()
+            self.result = True, result[2]
         else:
-            print result[1]
+            if result[1] == "DB_ERR_FILE_EXIST":
+                self.wait_window(window_Alertdialog(self, text="ผู้ใช้ซ้ำ"))
+            self.result = False, None
 
     def togglepasswordtextbox(self):
         """Check if has_pwd is true or not, toggle the disable state of pwd entry"""
